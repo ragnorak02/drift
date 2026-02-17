@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3 uid="uid://main001"]
+
+[ext_resource type="Script" path="res://scripts/race_manager.gd" id="1_race"]
+[ext_resource type="Script" path="res://scripts/lap_manager.gd" id="2_lap"]
+[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="3_cam"]
+[ext_resource type="PackedScene" uid="uid://track001" path="res://scenes/Track.tscn" id="4_track"]
+[ext_resource type="PackedScene" uid="uid://carplayer001" path="res://scenes/CarPlayer.tscn" id="5_car"]
+[ext_resource type="PackedScene" uid="uid://ui001" path="res://scenes/UI.tscn" id="6_ui"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_race")
+
+[node name="Track" parent="." instance=ExtResource("4_track")]
+
+[node name="CarPlayer" parent="." instance=ExtResource("5_car")]
+position = Vector2(900, 590)
+rotation = 1.5708
+
+[node name="LapManager" type="Node" parent="."]
+script = ExtResource("2_lap")
+
+[node name="RaceCamera" type="Camera2D" parent="."]
+script = ExtResource("3_cam")
+
+[node name="UI" parent="." instance=ExtResource("6_ui")]

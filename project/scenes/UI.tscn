@@ -1,0 +1,418 @@
+[gd_scene load_steps=3 format=3 uid="uid://ui001"]
+
+[ext_resource type="Script" path="res://scripts/ui_controller.gd" id="1_ui"]
+[ext_resource type="Script" path="res://scripts/input_highlight.gd" id="2_highlight"]
+
+[node name="UI" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_ui")
+
+[node name="HUD" type="VBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+
+[node name="TopBar" type="HBoxContainer" parent="HUD"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="LapLabel" type="Label" parent="HUD/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.784, 0.314, 1)
+theme_override_font_sizes/font_size = 24
+text = "LAP 1/3"
+
+[node name="TimeLabel" type="Label" parent="HUD/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "0:00.00"
+
+[node name="BestLabel" type="Label" parent="HUD/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "BEST: --:--.---"
+
+[node name="ItemIndicator" type="Label" parent="HUD/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 0.9)
+theme_override_font_sizes/font_size = 20
+text = ""
+
+[node name="SpeedContainer" type="HBoxContainer" parent="HUD/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="SpeedLabel" type="Label" parent="HUD/TopBar/SpeedContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.8)
+theme_override_font_sizes/font_size = 20
+text = "0 km/h"
+
+[node name="CountdownLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.941, 0.784, 0.314, 1)
+theme_override_font_sizes/font_size = 72
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="DebugOverlay" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 120.0
+grow_horizontal = 0
+visible = false
+
+[node name="DebugTitle" type="Label" parent="DebugOverlay"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 0.8)
+theme_override_font_sizes/font_size = 14
+text = "[DEBUG - F1]"
+
+[node name="DebugSpeed" type="Label" parent="DebugOverlay"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "Speed: 0"
+
+[node name="DebugDrift" type="Label" parent="DebugOverlay"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "Drift: no"
+
+[node name="DebugGrip" type="Label" parent="DebugOverlay"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "Traction: 0.85"
+
+[node name="DebugSteer" type="Label" parent="DebugOverlay"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "Steer: 0.00"
+
+[node name="ControlLetterbox" type="PanelContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBox" type="HBoxContainer" parent="ControlLetterbox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="GasCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="GasHint" type="PanelContainer" parent="ControlLetterbox/HBox/GasCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "accelerate"
+label_text = "GAS"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/GasCol/GasHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "GAS"
+horizontal_alignment = 1
+
+[node name="GasMap" type="Label" parent="ControlLetterbox/HBox/GasCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[A] / W"
+horizontal_alignment = 1
+
+[node name="BrakeCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="BrakeHint" type="PanelContainer" parent="ControlLetterbox/HBox/BrakeCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "brake"
+label_text = "BRAKE"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/BrakeCol/BrakeHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "BRAKE"
+horizontal_alignment = 1
+
+[node name="BrakeMap" type="Label" parent="ControlLetterbox/HBox/BrakeCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[X] / S"
+horizontal_alignment = 1
+
+[node name="SteerCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="SteerHint" type="PanelContainer" parent="ControlLetterbox/HBox/SteerCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "steer_left"
+label_text = "STEER"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/SteerCol/SteerHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "STEER"
+horizontal_alignment = 1
+
+[node name="SteerMap" type="Label" parent="ControlLetterbox/HBox/SteerCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[LS] / A,D"
+horizontal_alignment = 1
+
+[node name="JumpCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="JumpHint" type="PanelContainer" parent="ControlLetterbox/HBox/JumpCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "jump"
+label_text = "JUMP"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/JumpCol/JumpHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "JUMP"
+horizontal_alignment = 1
+
+[node name="JumpMap" type="Label" parent="ControlLetterbox/HBox/JumpCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[RT/LT] / Space"
+horizontal_alignment = 1
+
+[node name="ItemCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="ItemHint" type="PanelContainer" parent="ControlLetterbox/HBox/ItemCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "use_item"
+label_text = "ITEM"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/ItemCol/ItemHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "ITEM"
+horizontal_alignment = 1
+
+[node name="ItemMap" type="Label" parent="ControlLetterbox/HBox/ItemCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[B] / E"
+horizontal_alignment = 1
+
+[node name="ResetCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="ResetHint" type="PanelContainer" parent="ControlLetterbox/HBox/ResetCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "reset"
+label_text = "RESET"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/ResetCol/ResetHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "RESET"
+horizontal_alignment = 1
+
+[node name="ResetMap" type="Label" parent="ControlLetterbox/HBox/ResetCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[Y] / R"
+horizontal_alignment = 1
+
+[node name="PauseCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="PauseHint" type="PanelContainer" parent="ControlLetterbox/HBox/PauseCol"]
+layout_mode = 2
+script = ExtResource("2_highlight")
+action_name = "pause"
+label_text = "PAUSE"
+
+[node name="Label" type="Label" parent="ControlLetterbox/HBox/PauseCol/PauseHint"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "PAUSE"
+horizontal_alignment = 1
+
+[node name="PauseMap" type="Label" parent="ControlLetterbox/HBox/PauseCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "[Start] / Esc"
+horizontal_alignment = 1
+
+[node name="PauseMenu" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="PauseBG" type="ColorRect" parent="PauseMenu"]
+layout_mode = 2
+custom_minimum_size = Vector2(1280, 720)
+color = Color(0, 0, 0, 0.6)
+
+[node name="PausePanel" type="PanelContainer" parent="PauseMenu"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 250)
+
+[node name="VBox" type="VBoxContainer" parent="PauseMenu/PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PauseTitle" type="Label" parent="PauseMenu/PausePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.784, 0.314, 1)
+theme_override_font_sizes/font_size = 28
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="PauseMenu/PausePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+
+[node name="ResumeButton" type="Button" parent="PauseMenu/PausePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Resume"
+
+[node name="RestartButton" type="Button" parent="PauseMenu/PausePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Restart"
+
+[node name="MainMenuButton" type="Button" parent="PauseMenu/PausePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Main Menu"
+
+[node name="RaceCompletePanel" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="CompleteBG" type="ColorRect" parent="RaceCompletePanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(1280, 720)
+color = Color(0, 0, 0, 0.7)
+
+[node name="CompletePanel" type="PanelContainer" parent="RaceCompletePanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(350, 300)
+
+[node name="VBox" type="VBoxContainer" parent="RaceCompletePanel/CompletePanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="CompleteTitle" type="Label" parent="RaceCompletePanel/CompletePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.784, 0.314, 1)
+theme_override_font_sizes/font_size = 32
+text = "RACE COMPLETE!"
+horizontal_alignment = 1
+
+[node name="RaceTotalTime" type="Label" parent="RaceCompletePanel/CompletePanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Total: 0:00.00"
+horizontal_alignment = 1
+
+[node name="RaceBestLap" type="Label" parent="RaceCompletePanel/CompletePanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Best Lap: 0:00.00"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="RaceCompletePanel/CompletePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+
+[node name="RaceRestartButton" type="Button" parent="RaceCompletePanel/CompletePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Race Again"
+
+[node name="RaceMenuButton" type="Button" parent="RaceCompletePanel/CompletePanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Main Menu"
+
+[connection signal="pressed" from="PauseMenu/PausePanel/VBox/ResumeButton" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="PauseMenu/PausePanel/VBox/RestartButton" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="PauseMenu/PausePanel/VBox/MainMenuButton" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="RaceCompletePanel/CompletePanel/VBox/RaceRestartButton" to="." method="_on_race_restart_pressed"]
+[connection signal="pressed" from="RaceCompletePanel/CompletePanel/VBox/RaceMenuButton" to="." method="_on_race_menu_pressed"]

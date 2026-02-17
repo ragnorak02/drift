@@ -1,0 +1,22 @@
+{
+  "id": "drift",
+  "title": "Loop Drift Racer",
+  "engine": "godot",
+  "engineVersion": "4.4",
+  "genre": "Racing",
+  "description": "Lap-based racing game with drift mechanics. Features car physics, checkpoint system, lap tracking, and a main menu.",
+  "status": "in-development",
+  "version": "0.1.0",
+  "launch": {
+    "type": "godot",
+    "projectSubdir": "project",
+    "mainScene": "res://scenes/Main.tscn"
+  },
+  "tags": ["racing", "drift", "3d", "prototype"],
+  "thumbnail": "",
+  "metadata": {
+    "lastGameplayUpdate": "2026-02-17",
+    "buildVersion": "0.1.0",
+    "progressPercent": 15
+  }
+}
