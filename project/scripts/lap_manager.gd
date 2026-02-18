@@ -6,7 +6,7 @@ signal lap_count_updated(current_lap: int, total_laps: int)
 signal checkpoint_registered(index: int)
 
 @export var total_laps: int = 3
-@export var total_checkpoints: int = 3
+@export var total_checkpoints: int = 4
 
 var current_lap: int = 0
 var checkpoints_hit: Array[int] = []
@@ -47,12 +47,9 @@ func cross_finish_line() -> void:
 	if not race_active or race_complete:
 		return
 
-	# First crossing starts lap 1 timing — already handled in start_race
-	# Check all checkpoints were hit
 	if checkpoints_hit.size() < total_checkpoints:
 		return
 
-	# Valid lap completion
 	var lap_time := current_lap_time
 	lap_times.append(lap_time)
 
@@ -62,12 +59,10 @@ func cross_finish_line() -> void:
 	lap_completed.emit(current_lap, lap_time)
 
 	if current_lap >= total_laps:
-		# Race finished
 		race_complete = true
 		race_active = false
 		race_finished.emit(total_race_time, best_lap_time)
 	else:
-		# Next lap
 		current_lap += 1
 		checkpoints_hit.clear()
 		lap_start_time = Time.get_ticks_msec() / 1000.0

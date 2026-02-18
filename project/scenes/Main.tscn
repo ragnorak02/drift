@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://main001"]
+[gd_scene load_steps=5 format=3 uid="uid://main001"]
 
 [ext_resource type="Script" path="res://scripts/race_manager.gd" id="1_race"]
 [ext_resource type="Script" path="res://scripts/lap_manager.gd" id="2_lap"]
-[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="3_cam"]
 [ext_resource type="PackedScene" uid="uid://track001" path="res://scenes/Track.tscn" id="4_track"]
 [ext_resource type="PackedScene" uid="uid://carplayer001" path="res://scenes/CarPlayer.tscn" id="5_car"]
 [ext_resource type="PackedScene" uid="uid://ui001" path="res://scenes/UI.tscn" id="6_ui"]
@@ -13,13 +12,35 @@ script = ExtResource("1_race")
 [node name="Track" parent="." instance=ExtResource("4_track")]
 
 [node name="CarPlayer" parent="." instance=ExtResource("5_car")]
-position = Vector2(900, 590)
+position = Vector2(1000, 700)
 rotation = 1.5708
+
+[node name="CarPlayer2" parent="." instance=ExtResource("5_car")]
+position = Vector2(1000, 900)
+rotation = 1.5708
+player_id = 2
+car_color = Color(1.0, 0.3, 0.2, 1.0)
 
 [node name="LapManager" type="Node" parent="."]
 script = ExtResource("2_lap")
 
-[node name="RaceCamera" type="Camera2D" parent="."]
-script = ExtResource("3_cam")
+[node name="LapManager2" type="Node" parent="."]
+script = ExtResource("2_lap")
+
+[node name="ScreenLayout" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="ScreenLayout"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="UI" parent="." instance=ExtResource("6_ui")]
