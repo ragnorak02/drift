@@ -163,29 +163,69 @@ func _build_background() -> void:
 	add_child(bg)
 
 func _build_road_surface() -> void:
-	var road_poly := PackedVector2Array()
-	for p in _outer_points:
-		road_poly.append(p)
-	for i in range(_inner_points.size() - 1, -1, -1):
-		road_poly.append(_inner_points[i])
+	var n := _outer_points.size()
+	var curb_offset := 0.07  # fraction of half-width for curb strip
+	var curb_seg_len := 40.0  # length for alternating curb colors
 
-	var road := Polygon2D.new()
-	road.polygon = road_poly
-	road.color = Color(0.28, 0.28, 0.32, 1)
-	road.z_index = -5
-	add_child(road)
+	for i in n:
+		var ni := (i + 1) % n
 
-	# Racing line (center stripe)
-	var line := Line2D.new()
-	var pts := PackedVector2Array()
-	for p in centerline:
-		pts.append(p)
-	pts.append(centerline[0])
-	line.points = pts
-	line.width = 3.0
-	line.default_color = Color(1, 1, 1, 0.08)
-	line.z_index = -4
-	add_child(line)
+		# Road quad (asphalt)
+		var road_quad := Polygon2D.new()
+		road_quad.polygon = PackedVector2Array([
+			_outer_points[i], _outer_points[ni],
+			_inner_points[ni], _inner_points[i]
+		])
+		road_quad.color = Color(0.25, 0.25, 0.30, 1)
+		road_quad.z_index = -5
+		add_child(road_quad)
+
+		# Outer curb strip
+		var o1 := _outer_points[i]
+		var o2 := _outer_points[ni]
+		var i1 := _inner_points[i]
+		var i2 := _inner_points[ni]
+		var oc1 := o1.lerp(i1, curb_offset)
+		var oc2 := o2.lerp(i2, curb_offset)
+		var outer_curb := Polygon2D.new()
+		outer_curb.polygon = PackedVector2Array([o1, o2, oc2, oc1])
+		outer_curb.color = Color(0.8, 0.15, 0.1, 1) if (i / 2) % 2 == 0 else Color(0.9, 0.9, 0.9, 1)
+		outer_curb.z_index = -4
+		add_child(outer_curb)
+
+		# Inner curb strip
+		var ic1 := i1.lerp(o1, curb_offset)
+		var ic2 := i2.lerp(o2, curb_offset)
+		var inner_curb := Polygon2D.new()
+		inner_curb.polygon = PackedVector2Array([i1, i2, ic2, ic1])
+		inner_curb.color = Color(0.8, 0.15, 0.1, 1) if (i / 2) % 2 == 0 else Color(0.9, 0.9, 0.9, 1)
+		inner_curb.z_index = -4
+		add_child(inner_curb)
+
+	# Dashed center line
+	var dash_len := 30.0
+	var gap_len := 30.0
+	for i in centerline.size():
+		var ni := (i + 1) % centerline.size()
+		var p1 := centerline[i]
+		var p2 := centerline[ni]
+		var seg_dir := p2 - p1
+		var seg_length := seg_dir.length()
+		if seg_length < 1.0:
+			continue
+		var seg_norm := seg_dir / seg_length
+		var dist := 0.0
+		while dist < seg_length:
+			var start := p1 + seg_norm * dist
+			var end_dist := minf(dist + dash_len, seg_length)
+			var end := p1 + seg_norm * end_dist
+			var dash := Line2D.new()
+			dash.points = PackedVector2Array([start, end])
+			dash.width = 4.0
+			dash.default_color = Color(1, 1, 1, 0.5)
+			dash.z_index = -3
+			add_child(dash)
+			dist += dash_len + gap_len
 
 func _build_elevation_zones() -> void:
 	# Downhill section = lower (darker) — indices 11-14

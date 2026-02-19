@@ -1,7 +1,7 @@
 # Loop Drift Racer — CLAUDE.md
 
 ## Overview
-Top-down 2D split-screen drift racing game built in Godot 4.4. Large winding track (~7200x4800px) with separated drift-boost and jump mechanics, homing missiles, item pickups, checkpoint-based lap validation, and a 3-lap 2-player race format. All track geometry, walls, and pickups are built procedurally in code.
+Top-down 2D overhead-view drift racing game built in Godot 4.4. Large winding track (~7200x4800px) with separated drift-boost and jump mechanics, homing missiles, item pickups, checkpoint-based lap validation, and a 3-lap 2-player race format. Single overhead camera shows the entire track. All track geometry, walls, and pickups are built procedurally in code.
 
 ## Running
 ```
@@ -23,15 +23,8 @@ Main (Node2D, race_manager.gd)
 ├── CarPlayer2 (CharacterBody2D, car_controller.gd) — P2 car, player_id=2, red
 ├── LapManager (Node, lap_manager.gd)     — P1 lap/checkpoint/time tracking
 ├── LapManager2 (Node, lap_manager.gd)    — P2 lap/checkpoint/time tracking
-├── ScreenLayout (Control)                — split-screen container
-│   └── VBox
-│       ├── SubViewportContainerP1        — top half (created by race_manager)
-│       │   └── SubViewportP1
-│       │       └── CameraP1 (camera_follow.gd)
-│       ├── Divider (gold 4px line)
-│       └── SubViewportContainerP2        — bottom half
-│           └── SubViewportP2
-│               └── CameraP2 (camera_follow.gd)
+├── ScreenLayout (Control)                — unused (hidden), legacy split-screen container
+├── OverheadCamera (Camera2D)             — static camera centered on track, zoom 0.16 (created by race_manager)
 └── UI (CanvasLayer, ui_controller.gd)    — dual HUDs, pause, race complete, debug, controls
 ```
 
@@ -39,7 +32,7 @@ Main (Node2D, race_manager.gd)
 
 | Script | Extends | Purpose |
 |--------|---------|---------|
-| `race_manager.gd` | Node2D | Orchestrator — wires 2 cars/track/2 lap managers/UI, split-screen setup, countdown, missile spawning |
+| `race_manager.gd` | Node2D | Orchestrator — wires 2 cars/track/2 lap managers/UI, overhead camera setup, countdown, missile spawning |
 | `car_controller.gd` | CharacterBody2D | Car physics — acceleration, steering, separated drift+boost and jump mechanics, missiles, hit stun, P2 support via _action() |
 | `track.gd` | Node2D | Procedural track from 65-point centerline — road, walls, elevation zones, checkpoints, boost+missile items, jump ramps |
 | `lap_manager.gd` | Node | 3-lap race, 4 checkpoints per lap required, time tracking, best lap |
@@ -67,7 +60,7 @@ car_controller ──missile_fired(pos, dir, car)───────► race_m
 ### Wiring
 - `race_manager._ready()` sets ui refs (car, car2, lap_manager, lap_manager2)
 - `track.connect_to_lap_manager(lm, car)` called twice — once per player with car filtering lambdas
-- `race_manager._setup_split_screen()` creates SubViewports programmatically, shares world_2d, wires cameras
+- `race_manager._setup_overhead_camera()` creates a single Camera2D centered on the track at zoom 0.16
 
 ## Core Mechanics
 
@@ -146,7 +139,7 @@ car_controller ──missile_fired(pos, dir, car)───────► race_m
 
 - **All geometry is procedural** — track.gd builds road polygons, walls (StaticBody2D + CollisionPolygon2D), checkpoints, items, and visual elements in `_ready()`
 - **No .tscn UI layouts for game content** — UI.tscn defined in scene file, but all track/car visuals are code-built
-- **Split-screen via SubViewports** — race_manager creates SubViewportContainers programmatically, shares world_2d
+- **Overhead camera** — single static Camera2D at track center (3150, 2175) with zoom 0.16, shows entire track
 - **Player abstraction via _action()** — `car_controller._action("jump")` returns `"p2_jump"` for player_id 2
 - **Checkpoint filtering via lambdas** — track.gd connects checkpoint signals with closure that checks `body == car`
 - **Tween-based animation** — jump arc, drift boost squash, shadow all use `create_tween()`
@@ -165,7 +158,7 @@ drift/
     ├── icon.svg
     ├── scenes/
     │   ├── MainMenu.tscn   — title screen (run/main_scene)
-    │   ├── Main.tscn       — race scene: 2 cars, 2 lap managers, split-screen layout
+    │   ├── Main.tscn       — race scene: 2 cars, 2 lap managers, overhead camera
     │   ├── CarPlayer.tscn  — car body + collision + polygons
     │   ├── Track.tscn       — empty node with track.gd
     │   └── UI.tscn         — dual P1/P2 HUDs, pause/complete/debug/letterbox
@@ -196,8 +189,8 @@ drift/
 - [x] Missile pickup + homing missile combat
 - [x] Hit stun system (spin-out + slowdown)
 - [x] 2 jump ramp sections with layer 2 walls
-- [x] 2-player split-screen with follow cameras
-- [x] Dual P1/P2 HUDs (lap, time, speed, items, missiles)
+- [x] 2-player overhead view (full track visible, single camera)
+- [x] Dual P1/P2 HUDs (P1 top, P2 bottom — lap, time, speed, items, missiles)
 - [x] Pause menu with resume/restart/main menu
 - [x] Race complete screen (shows winner + both players' times)
 - [x] Debug overlay (F1) — speed, drift/airborne/stun state, traction, steer input

@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Main race scene orchestrator.
-## Wires up 2 cars, track, lap managers, split-screen cameras, and UI.
+## Wires up 2 cars, track, lap managers, overhead camera, and UI.
 
 @onready var car: CharacterBody2D = $CarPlayer
 @onready var car2: CharacterBody2D = $CarPlayer2
@@ -9,12 +9,6 @@ extends Node2D
 @onready var lap_manager: Node = $LapManager
 @onready var lap_manager2: Node = $LapManager2
 @onready var ui: CanvasLayer = $UI
-
-# Split-screen viewport refs (set up in _ready)
-var _viewport_p1: SubViewport = null
-var _viewport_p2: SubViewport = null
-var _camera_p1: Camera2D = null
-var _camera_p2: Camera2D = null
 
 var _race_winner: int = 0  # 0 = no winner yet, 1 or 2
 
@@ -37,71 +31,24 @@ func _ready() -> void:
 	car.missile_fired.connect(_on_missile_fired)
 	car2.missile_fired.connect(_on_missile_fired)
 
-	# Set up split-screen
-	_setup_split_screen()
+	# Hide the unused ScreenLayout from split-screen era
+	$ScreenLayout.visible = false
+
+	# Set up overhead camera showing entire track
+	_setup_overhead_camera()
 
 	# Start countdown then race
 	_start_race_sequence()
 
-func _setup_split_screen() -> void:
-	var screen_layout: Control = $ScreenLayout
-	var vbox: VBoxContainer = screen_layout.get_node("VBox")
-
-	# P1 viewport
-	var container_p1 := SubViewportContainer.new()
-	container_p1.name = "SubViewportContainerP1"
-	container_p1.custom_minimum_size = Vector2(1280, 356)
-	container_p1.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	container_p1.stretch = true
-	vbox.add_child(container_p1)
-
-	_viewport_p1 = SubViewport.new()
-	_viewport_p1.name = "SubViewportP1"
-	_viewport_p1.size = Vector2i(1280, 356)
-	_viewport_p1.handle_input_locally = false
-	_viewport_p1.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	container_p1.add_child(_viewport_p1)
-
-	_camera_p1 = Camera2D.new()
-	_camera_p1.name = "CameraP1"
-	var cam_script := load("res://scripts/camera_follow.gd")
-	_camera_p1.set_script(cam_script)
-	_viewport_p1.add_child(_camera_p1)
-
-	# Gold divider
-	var divider := ColorRect.new()
-	divider.name = "Divider"
-	divider.custom_minimum_size = Vector2(1280, 4)
-	divider.color = Color(0.941, 0.784, 0.314, 1)
-	vbox.add_child(divider)
-
-	# P2 viewport
-	var container_p2 := SubViewportContainer.new()
-	container_p2.name = "SubViewportContainerP2"
-	container_p2.custom_minimum_size = Vector2(1280, 356)
-	container_p2.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	container_p2.stretch = true
-	vbox.add_child(container_p2)
-
-	_viewport_p2 = SubViewport.new()
-	_viewport_p2.name = "SubViewportP2"
-	_viewport_p2.size = Vector2i(1280, 356)
-	_viewport_p2.handle_input_locally = false
-	_viewport_p2.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	container_p2.add_child(_viewport_p2)
-
-	_camera_p2 = Camera2D.new()
-	_camera_p2.name = "CameraP2"
-	_camera_p2.set_script(cam_script)
-	_viewport_p2.add_child(_camera_p2)
-
-	# Share the main world_2d so both viewports see game objects
-	_viewport_p1.world_2d = get_viewport().world_2d
-	_viewport_p2.world_2d = get_viewport().world_2d
-
-	# Wire camera targets
-	_camera_p1.set_target(car)
-	_camera_p2.set_target(car2)
+func _setup_overhead_camera() -> void:
+	var cam := Camera2D.new()
+	cam.name = "OverheadCamera"
+	# Center of track bounding box (~350-5950 x ~150-4200)
+	cam.position = Vector2(3150, 2175)
+	# Zoom to fit entire track: min(1280/5600, 720/4050) * 0.9 margin ≈ 0.16
+	cam.zoom = Vector2(0.16, 0.16)
+	cam.enabled = true
+	add_child(cam)
 
 func _start_race_sequence() -> void:
 	car.race_started = false
