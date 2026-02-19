@@ -1,0 +1,56 @@
+{
+  "gameId": "drift",
+  "integrationStatus": "not_started",
+  "lastUpdated": "2026-02-18T00:00:00Z",
+  "achievements": [
+    {
+      "id": "first_lap",
+      "trigger": "lap_manager.cross_finish_line() — first time any player completes lap 1",
+      "hook": "Not implemented",
+      "status": "planned"
+    },
+    {
+      "id": "first_race",
+      "trigger": "lap_manager.race_finished signal — first time any player completes 3 laps",
+      "hook": "Not implemented",
+      "status": "planned"
+    },
+    {
+      "id": "drift_king",
+      "trigger": "car_controller drift_time >= 3.0 seconds in a single drift",
+      "hook": "Not implemented",
+      "status": "planned"
+    },
+    {
+      "id": "speed_demon",
+      "trigger": "car_controller speed >= max_speed (1200)",
+      "hook": "Not implemented",
+      "status": "planned"
+    },
+    {
+      "id": "clean_run",
+      "trigger": "Race completed with wall_hit_count == 0 (counter not yet tracked)",
+      "hook": "Not implemented — needs wall collision counter",
+      "status": "planned"
+    },
+    {
+      "id": "checkpoint_ace",
+      "trigger": "All 4 checkpoints hit in a single lap (already validated by lap_manager)",
+      "hook": "Not implemented",
+      "status": "planned"
+    },
+    {
+      "id": "personal_best",
+      "trigger": "New best lap time < previous best (needs save system for persistence)",
+      "hook": "Not implemented — needs save system",
+      "status": "planned"
+    },
+    {
+      "id": "track_master",
+      "trigger": "Total races completed >= 10 (needs persistent counter via save system)",
+      "hook": "Not implemented — needs save system",
+      "status": "planned"
+    }
+  ],
+  "notes": "Achievement hooks require: (1) in-game event listeners on existing signals, (2) save system for persistence, (3) UI toast/popup for unlock notification. See achievements.json for point values and display data."
+}

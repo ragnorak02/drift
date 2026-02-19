@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop Drift Racer — Status</title>
+<style>
+  :root { --bg: #0a0a12; --card: #14141f; --gold: #f0c850; --green: #4caf50; --red: #e74c3c; --orange: #f39c12; --gray: #555; --text: #e0e0e0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
+  h1 { color: var(--gold); margin-bottom: 0.5rem; }
+  .subtitle { color: #888; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+  .card { background: var(--card); border: 1px solid #222; border-radius: 8px; padding: 1.2rem; }
+  .card h2 { color: var(--gold); font-size: 1rem; margin-bottom: 0.8rem; border-bottom: 1px solid #222; padding-bottom: 0.5rem; }
+  .stat { display: flex; justify-content: space-between; margin: 0.4rem 0; font-size: 0.9rem; }
+  .stat .label { color: #999; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+  .complete { background: var(--green); color: #fff; }
+  .partial { background: var(--orange); color: #fff; }
+  .missing { background: var(--red); color: #fff; }
+  .unknown { background: var(--gray); color: #fff; }
+  .progress-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; margin: 0.5rem 0; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold), #d4af37); }
+  .milestone { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; font-size: 0.9rem; }
+  .check { color: var(--green); } .cross { color: var(--red); }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #222; font-size: 0.85rem; }
+  th { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<h1>Loop Drift Racer</h1>
+<p class="subtitle">Godot 4.4 | Racing | v0.1.0</p>
+
+<div class="grid">
+  <div class="card">
+    <h2>Progress</h2>
+    <div class="stat"><span class="label">Completion</span><span>15%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:15%"></div></div>
+    <div class="stat"><span class="label">Phase</span><span>Development</span></div>
+    <div class="stat"><span class="label">Build</span><span>0.1.0</span></div>
+    <div class="stat"><span class="label">Engine</span><span>Godot 4.4</span></div>
+    <div class="stat"><span class="label">Graphics</span><span>2D</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Features</h2>
+    <div class="stat"><span class="label">Controller Support</span><span class="badge complete">Complete</span></div>
+    <div class="stat"><span class="label">VFX</span><span class="badge partial">Partial</span></div>
+    <div class="stat"><span class="label">Achievements</span><span class="badge missing">Missing</span></div>
+    <div class="stat"><span class="label">Test Scripts</span><span class="badge missing">Missing</span></div>
+    <div class="stat"><span class="label">Save System</span><span class="badge missing">Missing</span></div>
+    <div class="stat"><span class="label">Settings Menu</span><span class="badge missing">Missing</span></div>
+    <div class="stat"><span class="label">Audio</span><span class="badge missing">Missing</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Milestones</h2>
+    <div class="milestone"><span class="check">&#10003;</span> Core Gameplay Loop</div>
+    <div class="milestone"><span class="check">&#10003;</span> Controller Integration</div>
+    <div class="milestone"><span class="cross">&#10007;</span> First Graphics Pass</div>
+    <div class="milestone"><span class="cross">&#10007;</span> Vertical Slice</div>
+    <div class="milestone"><span class="cross">&#10007;</span> Content Complete</div>
+    <div class="milestone"><span class="cross">&#10007;</span> Production Ready</div>
+  </div>
+
+  <div class="card">
+    <h2>Testing</h2>
+    <div class="stat"><span class="label">Status</span><span class="badge unknown">Unknown</span></div>
+    <div class="stat"><span class="label">Test Command</span><span>Not configured</span></div>
+    <div class="stat"><span class="label">Last Run</span><span>Never</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>What's Built</h2>
+  <table>
+    <tr><th>System</th><th>Details</th></tr>
+    <tr><td>Car Physics</td><td>Acceleration, braking, steering, traction, max speed 1200</td></tr>
+    <tr><td>Drift Mechanic</td><td>Hold-to-charge boost, color shift feedback, tire marks</td></tr>
+    <tr><td>Jump Mechanic</td><td>One-shot arc, airborne momentum, landing squash, 0.4s cooldown</td></tr>
+    <tr><td>Track</td><td>Procedural 65-point centerline, ~7200x4800px, walls, elevation zones</td></tr>
+    <tr><td>Checkpoints</td><td>4 checkpoints + finish line, 3-lap validation</td></tr>
+    <tr><td>Items</td><td>6 boost pickups (8s respawn), 5 missile pickups (10s respawn)</td></tr>
+    <tr><td>Missiles</td><td>Homing missiles: launch &rarr; tracking &rarr; expire, hit stun 1.5s</td></tr>
+    <tr><td>Split-Screen</td><td>2P SubViewport layout, independent cameras + HUDs</td></tr>
+    <tr><td>UI</td><td>Dual HUDs, countdown, pause menu, race complete, debug overlay (F1)</td></tr>
+    <tr><td>Input</td><td>P1: WASD+mouse+gamepad, P2: arrows+gamepad, auto-detection</td></tr>
+  </table>
+</div>
+
+</body>
+</html>

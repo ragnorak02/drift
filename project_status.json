@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "gameId": "drift",
+  "title": "Loop Drift Racer",
+  "lastUpdated": "2026-02-18T00:00:00Z",
+  "health": {
+    "progressPercent": 15,
+    "buildVersion": "0.1.0",
+    "assetStage": null
+  },
+  "tech": {
+    "engine": "Godot",
+    "engineVersion": "4.4",
+    "languages": ["GDScript"],
+    "graphicsType": "2D"
+  },
+  "features": {
+    "controllerSupport": "complete",
+    "achievementsSystem": "missing",
+    "testScripts": "missing",
+    "saveSystem": "missing",
+    "settingsMenu": "missing",
+    "audio": "missing",
+    "vfx": "partial"
+  },
+  "milestones": {
+    "firstGraphicsPass": false,
+    "controllerIntegration": true,
+    "coreGameplayLoop": true,
+    "verticalSlice": false,
+    "contentComplete": false,
+    "productionReady": false
+  },
+  "testing": {
+    "testCommand": null,
+    "lastRunAt": null,
+    "status": "unknown",
+    "notes": "No test runner configured"
+  },
+  "links": {
+    "repo": null,
+    "launcherId": "drift"
+  }
+}
