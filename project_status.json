@@ -6,7 +6,7 @@
   "health": {
     "progressPercent": 15,
     "buildVersion": "0.1.0",
-    "assetStage": null
+    "assetStage": "placeholder"
   },
   "tech": {
     "engine": "Godot",
