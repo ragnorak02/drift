@@ -7,48 +7,50 @@ signal missile_fired(spawn_pos: Vector2, direction: Vector2, source_car: Charact
 # -- Player ID --
 @export var player_id: int = 1
 @export var car_color: Color = Color(0.2, 0.6, 1.0, 1.0)
+@export var ai_controlled: bool = false
 
 # -- Movement --
-@export var acceleration: float = 900.0
-@export var max_speed: float = 1200.0
-@export var brake_force: float = 600.0
-@export var reverse_max_speed: float = 300.0
-@export var drag: float = 0.98
+@export var acceleration: float = GameConstants.CAR_ACCELERATION
+@export var max_speed: float = GameConstants.CAR_MAX_SPEED
+@export var brake_force: float = GameConstants.CAR_BRAKE_FORCE
+@export var reverse_max_speed: float = GameConstants.CAR_REVERSE_MAX_SPEED
+@export var drag: float = GameConstants.CAR_DRAG
 
 # -- Steering --
-@export var steering_speed: float = 3.0
-@export var steering_curve: float = 0.7
-@export var mouse_steer_speed: float = 4.0
+@export var steering_speed: float = GameConstants.CAR_STEERING_SPEED
+@export var steering_curve: float = GameConstants.CAR_STEERING_CURVE
+@export var mouse_steer_speed: float = GameConstants.CAR_MOUSE_STEER_SPEED
 
 # -- Traction --
-@export var base_traction: float = 0.85
-@export var traction_transition_speed: float = 10.0
+@export var base_traction: float = GameConstants.CAR_BASE_TRACTION
+@export var traction_transition_speed: float = GameConstants.CAR_TRACTION_TRANSITION_SPEED
 
 # -- Drift (separate from jump) --
-@export var drift_traction: float = 0.15
-@export var drift_steer_multiplier: float = 1.8
-@export var drift_min_speed: float = 200.0
-@export var drift_speed_decay: float = 0.97
-@export var drift_charge_full_time: float = 2.5
-@export var drift_boost_base: float = 300.0
-@export var drift_boost_per_second: float = 500.0
-@export var drift_boost_max: float = 1400.0
-@export var drift_min_angle: float = 0.15
-@export var drift_min_hold: float = 0.2
+@export var drift_traction: float = GameConstants.DRIFT_TRACTION
+@export var drift_steer_multiplier: float = GameConstants.DRIFT_STEER_MULTIPLIER
+@export var drift_min_speed: float = GameConstants.DRIFT_MIN_SPEED
+@export var drift_speed_decay: float = GameConstants.DRIFT_SPEED_DECAY
+@export var drift_charge_full_time: float = GameConstants.DRIFT_CHARGE_FULL_TIME
+@export var drift_boost_base: float = GameConstants.DRIFT_BOOST_BASE
+@export var drift_boost_per_second: float = GameConstants.DRIFT_BOOST_PER_SECOND
+@export var drift_boost_max: float = GameConstants.DRIFT_BOOST_MAX
+@export var drift_min_angle: float = GameConstants.DRIFT_MIN_ANGLE
+@export var drift_min_hold: float = GameConstants.DRIFT_MIN_HOLD
 
 # -- Jump (one-shot arc) --
-@export var jump_height: float = 3.0
-@export var jump_ascent_time: float = 0.25
-@export var jump_descent_time: float = 0.35
-@export var jump_cooldown: float = 0.4
-@export var jump_min_speed: float = 80.0
-@export var jump_air_drag: float = 0.999
+@export var jump_height: float = GameConstants.JUMP_HEIGHT
+@export var jump_ascent_time: float = GameConstants.JUMP_ASCENT_TIME
+@export var jump_descent_time: float = GameConstants.JUMP_DESCENT_TIME
+@export var jump_cooldown: float = GameConstants.JUMP_COOLDOWN
+@export var jump_min_speed: float = GameConstants.JUMP_MIN_SPEED
+@export var jump_air_drag: float = GameConstants.JUMP_AIR_DRAG
+@export var jump_air_steer_mult: float = GameConstants.JUMP_AIR_STEER_MULT
 ## Collision layer for jump-only walls (car ignores these while airborne)
-@export var jump_wall_layer: int = 2
+@export var jump_wall_layer: int = GameConstants.JUMP_WALL_LAYER
 
 # -- Item boost --
-@export var item_boost_speed: float = 500.0
-@export var item_boost_duration: float = 2.5
+@export var item_boost_speed: float = GameConstants.ITEM_BOOST_SPEED
+@export var item_boost_duration: float = GameConstants.ITEM_BOOST_DURATION
 
 # -- Missiles --
 var missile_count: int = 0
@@ -77,6 +79,9 @@ var drift_charge_time: float = 0.0
 var drift_charge_ratio: float = 0.0
 var is_drifting: bool = false
 
+# Jump-drift queue
+var _drift_queued: bool = false
+
 # Jump state
 var jump_airborne: bool = false
 var _jump_cooldown_timer: float = 0.0
@@ -99,6 +104,15 @@ var spawn_position: Vector2 = Vector2.ZERO
 var spawn_rotation: float = 0.0
 var race_started: bool = false
 var _original_collision_mask: int = 0
+
+# AI virtual inputs (written by ai_controller.gd)
+var ai_steer: float = 0.0
+var ai_throttle: float = 0.0
+var ai_brake: float = 0.0
+var ai_jump_pressed: bool = false
+var ai_drift_strength: float = 0.0
+var ai_use_item_pressed: bool = false
+var ai_fire_missile_pressed: bool = false
 
 var _car_sprite: Polygon2D = null
 var _nose_sprite: Polygon2D = null
@@ -211,6 +225,27 @@ func _physics_process(delta: float) -> void:
 	_update_drift_trails()
 
 func _read_input(delta: float) -> void:
+	if ai_controlled:
+		# AI path — read from ai_* vars set by ai_controller.gd
+		steer_input = ai_steer
+		throttle_input = ai_throttle
+		brake_input = ai_brake
+
+		if ai_jump_pressed and not jump_airborne and _jump_cooldown_timer <= 0.0 and current_speed > jump_min_speed:
+			_do_jump()
+		ai_jump_pressed = false
+
+		_process_drift_input(delta, ai_drift_strength)
+
+		if ai_use_item_pressed and has_item:
+			_activate_item_boost()
+		ai_use_item_pressed = false
+
+		if ai_fire_missile_pressed and missile_count > 0:
+			_fire_missile()
+		ai_fire_missile_pressed = false
+		return
+
 	# -- Steering --
 	var kb_steer := Input.get_axis(_action("steer_left"), _action("steer_right"))
 	if abs(kb_steer) > 0.05 and player_id == 1:
@@ -242,41 +277,11 @@ func _read_input(delta: float) -> void:
 	if Input.is_action_just_pressed(_action("jump")) and not jump_airborne and _jump_cooldown_timer <= 0.0 and current_speed > jump_min_speed:
 		_do_jump()
 
-	# -- Drift (hold while turning) --
+	# -- Drift --
 	var drift_strength := Input.get_action_strength(_action("drift"))
 	if player_id == 1 and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
 		drift_strength = maxf(drift_strength, 1.0)
-	var was_drift_held := drift_held
-	drift_held = drift_strength > 0.15
-
-	if drift_held and not was_drift_held and current_speed > drift_min_speed and not jump_airborne:
-		# Start drift
-		is_drift_sliding = true
-		drift_charge_time = 0.0
-		drift_charge_ratio = 0.0
-
-	if is_drift_sliding:
-		if jump_airborne or current_speed < drift_min_speed * 0.5 or not drift_held:
-			# End drift
-			if drift_held:
-				# Cancelled by jump or speed loss — no boost
-				is_drift_sliding = false
-				drift_charge_time = 0.0
-				drift_charge_ratio = 0.0
-			else:
-				# Released drift button — grant boost if held long enough
-				_do_drift_boost()
-				is_drift_sliding = false
-				drift_charge_time = 0.0
-				drift_charge_ratio = 0.0
-		elif abs(steer_input) > drift_min_angle:
-			drift_charge_time += delta
-			drift_charge_ratio = clampf(drift_charge_time / drift_charge_full_time, 0.0, 1.0)
-
-	var was_drifting := is_drifting
-	is_drifting = is_drift_sliding and abs(steer_input) > drift_min_angle
-	if is_drifting != was_drifting:
-		drift_state_changed.emit(is_drifting)
+	_process_drift_input(delta, drift_strength)
 
 	# -- Use item boost --
 	if Input.is_action_just_pressed(_action("use_item")) and has_item:
@@ -290,8 +295,44 @@ func _read_input(delta: float) -> void:
 	if Input.is_action_just_pressed(_action("reset")):
 		reset_to_spawn()
 
+func _process_drift_input(delta: float, drift_strength_val: float) -> void:
+	var was_drift_held := drift_held
+	drift_held = drift_strength_val > 0.15
+
+	if drift_held and not was_drift_held and current_speed > drift_min_speed:
+		if jump_airborne:
+			_drift_queued = true
+		else:
+			is_drift_sliding = true
+			drift_charge_time = 0.0
+			drift_charge_ratio = 0.0
+
+	if _drift_queued and not drift_held:
+		_drift_queued = false
+
+	if is_drift_sliding:
+		if current_speed < drift_min_speed * 0.5 or not drift_held:
+			if drift_held:
+				is_drift_sliding = false
+				drift_charge_time = 0.0
+				drift_charge_ratio = 0.0
+			else:
+				_do_drift_boost()
+				is_drift_sliding = false
+				drift_charge_time = 0.0
+				drift_charge_ratio = 0.0
+		elif abs(steer_input) > drift_min_angle:
+			drift_charge_time += delta
+			drift_charge_ratio = clampf(drift_charge_time / drift_charge_full_time, 0.0, 1.0)
+
+	var was_drifting := is_drifting
+	is_drifting = is_drift_sliding and abs(steer_input) > drift_min_angle
+	if is_drifting != was_drifting:
+		drift_state_changed.emit(is_drifting)
+
 func _do_jump() -> void:
 	jump_airborne = true
+	_drift_queued = false
 	_shadow.visible = true
 	set_collision_mask_value(jump_wall_layer, false)
 
@@ -353,6 +394,12 @@ func _do_jump() -> void:
 		_shadow.modulate = Color(1, 1, 1, 0.35)
 		set_collision_mask_value(jump_wall_layer, true)
 		_jump_cooldown_timer = jump_cooldown
+		# Activate queued drift from mid-air input
+		if _drift_queued and drift_held and current_speed > drift_min_speed:
+			is_drift_sliding = true
+			drift_charge_time = 0.0
+			drift_charge_ratio = 0.0
+		_drift_queued = false
 	)
 
 func _do_drift_boost() -> void:
@@ -406,6 +453,7 @@ func collect_missiles(count: int) -> void:
 	missile_count += count
 
 func _fire_missile() -> void:
+	print("[Combat] P%d fired missile (remaining: %d)" % [player_id, missile_count - 1])
 	missile_count -= 1
 	var forward_dir := Vector2.from_angle(rotation - PI / 2.0)
 	# Alternate left/right headlight offset
@@ -416,10 +464,23 @@ func _fire_missile() -> void:
 	missile_fired.emit(spawn_pos, forward_dir, self)
 
 func hit_by_missile(dir: Vector2) -> void:
-	hit_stun_timer = 1.5
-	_hit_spin_speed = 15.0
-	velocity *= 0.3
-	velocity += dir * 200.0
+	hit_stun_timer = GameConstants.STUN_DURATION
+	_hit_spin_speed = GameConstants.STUN_SPIN_SPEED
+	velocity *= GameConstants.STUN_VELOCITY_RETAIN
+	velocity += dir * GameConstants.STUN_KNOCKBACK
+	# Kill jump tween and reset airborne if stunned mid-air
+	if jump_airborne:
+		if _jump_tween:
+			_jump_tween.kill()
+		jump_airborne = false
+		_shadow.visible = false
+		_shadow.scale = Vector2.ONE
+		_shadow.modulate = Color(1, 1, 1, 0.35)
+		_car_sprite.scale = Vector2.ONE
+		_nose_sprite.scale = Vector2.ONE
+		_car_sprite.position = Vector2.ZERO
+		_nose_sprite.position = Vector2.ZERO
+		set_collision_mask_value(jump_wall_layer, true)
 	# Red flash
 	_car_sprite.color = Color(1, 0.1, 0.1, 1)
 	_nose_sprite.color = Color(1, 0.1, 0.1, 1)
@@ -428,6 +489,7 @@ func hit_by_missile(dir: Vector2) -> void:
 	drift_charge_time = 0.0
 	drift_charge_ratio = 0.0
 	is_drifting = false
+	_drift_queued = false
 
 func _process_stun(delta: float) -> void:
 	hit_stun_timer -= delta
@@ -508,11 +570,16 @@ func _apply_physics(delta: float) -> void:
 
 	var effective_max := max_speed
 	if item_boost_active:
-		effective_max *= 1.5
+		effective_max *= GameConstants.ITEM_BOOST_MAX_SPEED_MULT
 
-	# While airborne: maintain momentum, minimal drag, no steering
+	# While airborne: maintain momentum, minimal drag, reduced steering
 	if jump_airborne:
 		velocity *= jump_air_drag
+		if velocity.length() > 10.0:
+			var speed_factor := clampf(current_speed / (effective_max * 0.3), 0.0, 1.0)
+			speed_factor = pow(speed_factor, steering_curve)
+			var steer_amount := steer_input * steering_speed * speed_factor * delta
+			rotation += steer_amount * jump_air_steer_mult
 		return
 
 	# Acceleration / braking
@@ -523,9 +590,9 @@ func _apply_physics(delta: float) -> void:
 		if forward_speed > -reverse_max_speed:
 			velocity -= forward_dir * brake_force * brake_input * delta
 
-	# Drift physics
+	# Drift physics (delta-scaled decay for framerate independence)
 	if is_drift_sliding:
-		velocity *= drift_speed_decay
+		velocity *= pow(drift_speed_decay, delta * 60.0)
 
 	var target_traction := drift_traction if is_drift_sliding else base_traction
 	current_traction = lerp(current_traction, target_traction, traction_transition_speed * delta)
@@ -533,9 +600,14 @@ func _apply_physics(delta: float) -> void:
 	var right_dir := Vector2.from_angle(rotation)
 	forward_speed = velocity.dot(forward_dir)
 	var lateral_speed := velocity.dot(right_dir)
-	lateral_speed = lerp(lateral_speed, 0.0, current_traction)
+	# Delta-scaled traction so grip is framerate-independent
+	var traction_factor := 1.0 - pow(1.0 - current_traction, delta * 60.0)
+	lateral_speed = lerp(lateral_speed, 0.0, traction_factor)
 	velocity = forward_dir * forward_speed + right_dir * lateral_speed
 	velocity *= drag
+	# Absolute speed cap prevents infinite stacking from drift + item boost
+	if velocity.length() > GameConstants.ABSOLUTE_MAX_SPEED:
+		velocity = velocity.normalized() * GameConstants.ABSOLUTE_MAX_SPEED
 
 	# Steering (skip while airborne — already returned above)
 	if velocity.length() > 10.0:
@@ -554,6 +626,7 @@ func _apply_physics(delta: float) -> void:
 		rotation += steer_amount
 
 func reset_to_spawn() -> void:
+	print("[Race] P%d reset to spawn" % player_id)
 	global_position = spawn_position
 	rotation = spawn_rotation
 	velocity = Vector2.ZERO
@@ -564,6 +637,7 @@ func reset_to_spawn() -> void:
 	drift_charge_time = 0.0
 	drift_charge_ratio = 0.0
 	jump_airborne = false
+	_drift_queued = false
 	_jump_cooldown_timer = 0.0
 	is_boosting = false
 	boost_timer = 0.0
