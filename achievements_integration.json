@@ -1,56 +1,56 @@
 {
   "gameId": "drift",
-  "integrationStatus": "not_started",
-  "lastUpdated": "2026-02-18T00:00:00Z",
+  "integrationStatus": "complete",
+  "lastUpdated": "2026-02-24T00:00:00Z",
   "achievements": [
     {
       "id": "first_lap",
-      "trigger": "lap_manager.cross_finish_line() — first time any player completes lap 1",
-      "hook": "Not implemented",
-      "status": "planned"
+      "trigger": "lap_completed signal — any player completes a lap",
+      "hook": "race_manager._on_achievement_lap_completed()",
+      "status": "implemented"
     },
     {
       "id": "first_race",
-      "trigger": "lap_manager.race_finished signal — first time any player completes 3 laps",
-      "hook": "Not implemented",
-      "status": "planned"
+      "trigger": "Race end — _on_race_finished()",
+      "hook": "AchievementManager.try_unlock in _on_race_finished()",
+      "status": "implemented"
     },
     {
       "id": "drift_king",
-      "trigger": "car_controller drift_time >= 3.0 seconds in a single drift",
-      "hook": "Not implemented",
-      "status": "planned"
+      "trigger": "drift_released signal — drift_charge_time >= 3.0",
+      "hook": "race_manager._on_achievement_drift_check()",
+      "status": "implemented"
     },
     {
       "id": "speed_demon",
-      "trigger": "car_controller speed >= max_speed (1200)",
-      "hook": "Not implemented",
-      "status": "planned"
+      "trigger": "speed_changed signal — speed >= CAR_MAX_SPEED",
+      "hook": "race_manager._on_achievement_speed_check()",
+      "status": "implemented"
     },
     {
       "id": "clean_run",
-      "trigger": "Race completed with wall_hit_count == 0 (counter not yet tracked)",
-      "hook": "Not implemented — needs wall collision counter",
-      "status": "planned"
+      "trigger": "Race end — winner car.wall_hit_count == 0",
+      "hook": "AchievementManager.try_unlock in _on_race_finished()",
+      "status": "implemented"
     },
     {
       "id": "checkpoint_ace",
-      "trigger": "All 4 checkpoints hit in a single lap (already validated by lap_manager)",
-      "hook": "Not implemented",
-      "status": "planned"
+      "trigger": "lap_completed signal — lap completion requires all checkpoints",
+      "hook": "race_manager._on_achievement_lap_completed()",
+      "status": "implemented"
     },
     {
       "id": "personal_best",
-      "trigger": "New best lap time < previous best (needs save system for persistence)",
-      "hook": "Not implemented — needs save system",
-      "status": "planned"
+      "trigger": "Race end — new_best_lap && prev_best_lap != INF",
+      "hook": "AchievementManager.try_unlock in _on_race_finished()",
+      "status": "implemented"
     },
     {
       "id": "track_master",
-      "trigger": "Total races completed >= 10 (needs persistent counter via save system)",
-      "hook": "Not implemented — needs save system",
-      "status": "planned"
+      "trigger": "Race end — LapHistory.get_total_race_count() >= 10",
+      "hook": "AchievementManager.try_unlock in _on_race_finished()",
+      "status": "implemented"
     }
   ],
-  "notes": "Achievement hooks require: (1) in-game event listeners on existing signals, (2) save system for persistence, (3) UI toast/popup for unlock notification. See achievements.json for point values and display data."
+  "notes": "AchievementManager is a static class (class_name AchievementManager, extends RefCounted). It loads/saves achievements.json at repo root. Toast notifications handled by ui_controller.show_achievement_toast(). Callbacks registered in race_manager._ready() with stale-callback safety via clear_callbacks()."
 }

@@ -72,16 +72,128 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = 100.0
-offset_right = 150.0
+offset_left = -200.0
+offset_top = -200.0
+offset_right = 200.0
 offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 visible = false
 
-[node name="Label" type="Label" parent="SettingsPanel"]
+[node name="SettingsVBox" type="VBoxContainer" parent="SettingsPanel"]
 layout_mode = 2
-text = "Settings coming soon..."
+theme_override_constants/separation = 12
+
+[node name="SettingsTitle" type="Label" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.784, 0.314, 1)
+theme_override_font_sizes/font_size = 24
+text = "SETTINGS"
 horizontal_alignment = 1
-vertical_alignment = 1
+
+[node name="MasterRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+
+[node name="MasterLabel" type="Label" parent="SettingsPanel/SettingsVBox/MasterRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 14
+text = "Master Volume"
+
+[node name="MasterSlider" type="HSlider" parent="SettingsPanel/SettingsVBox/MasterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="SfxRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+
+[node name="SfxLabel" type="Label" parent="SettingsPanel/SettingsVBox/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 14
+text = "SFX Volume"
+
+[node name="SfxSlider" type="HSlider" parent="SettingsPanel/SettingsVBox/SfxRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="MusicRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="SettingsPanel/SettingsVBox/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 14
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="SettingsPanel/SettingsVBox/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="DeadzoneRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+
+[node name="DeadzoneLabel" type="Label" parent="SettingsPanel/SettingsVBox/DeadzoneRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 14
+text = "Deadzone"
+
+[node name="DeadzoneSlider" type="HSlider" parent="SettingsPanel/SettingsVBox/DeadzoneRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.05
+max_value = 0.4
+step = 0.01
+value = 0.15
+
+[node name="ZoomRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+
+[node name="ZoomLabel" type="Label" parent="SettingsPanel/SettingsVBox/ZoomRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 14
+text = "Camera Zoom"
+
+[node name="ZoomSlider" type="HSlider" parent="SettingsPanel/SettingsVBox/ZoomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -0.05
+max_value = 0.05
+step = 0.005
+value = 0.0
+
+[node name="ButtonRow" type="HBoxContainer" parent="SettingsPanel/SettingsVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 15
+
+[node name="ResetButton" type="Button" parent="SettingsPanel/SettingsVBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "Reset Defaults"
+
+[node name="CloseButton" type="Button" parent="SettingsPanel/SettingsVBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "Close"

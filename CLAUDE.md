@@ -69,8 +69,7 @@ MainMenu
 → Return to Menu  
 
 Primary Mechanics:
-- Drift charge → boost release
-- Jump arc system
+- Drift charge → tiered boost release (hold-to-drift state machine)
 - Homing missile combat
 - Procedural track generation
 - 3-lap checkpoint validation
@@ -95,14 +94,19 @@ Main (race_manager.gd)
 
 ## Core Systems
 
-race_manager.gd — Orchestrator  
-car_controller.gd — Car physics + abilities  
-track.gd — Procedural road, walls, ramps, checkpoints  
-lap_manager.gd — Checkpoint validation + lap timing  
-ui_controller.gd — Dual HUD + pause + complete  
-missile.gd — Homing projectile logic  
-item_pickup.gd — Boost system  
-missile_pickup.gd — Missile grant system  
+race_manager.gd — Orchestrator
+car_controller.gd — Car physics + abilities
+track.gd — Procedural road, walls, ramps, checkpoints
+lap_manager.gd — Checkpoint validation + lap timing
+ui_controller.gd — Dual HUD + pause + complete
+missile.gd — Homing projectile logic
+item_pickup.gd — Boost system
+missile_pickup.gd — Missile grant system
+game_constants.gd — Centralized balance constants (class_name GameConstants)
+logger.gd — Timestamped logging utility (class_name Logger)
+input_remapper.gd — Input remap framework (class_name InputRemapper)
+settings_manager.gd — Settings persistence (class_name SettingsManager)
+lap_history.gd — Lap time persistence + PB tracking (class_name LapHistory)
 
 ---
 
@@ -133,8 +137,8 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 6. Scene tree structured
 - [x] 7. Countdown system stable
 - [x] 8. Reset-to-spawn stable
-- [ ] 9. Version/build identifier visible
-- [ ] 10. Error logging pattern standardized
+- [x] 9. Version/build identifier visible
+- [x] 10. Error logging pattern standardized
 
 ---
 
@@ -142,11 +146,11 @@ AMARIS STANDARD — 70 Checkpoints
 
 - [x] 11. Acceleration stable
 - [x] 12. Steering stable
-- [x] 13. Drift input separation from jump
-- [x] 14. Jump cooldown enforced
+- **N/A** 13. Drift input separation from jump (jump removed — drift uses all buttons)
+- **N/A** 14. Jump cooldown enforced (jump system removed in v0.3.0)
 - [x] 15. Input abstraction clean (_action pattern)
-- [ ] 16. Input remap support
-- [ ] 17. Controller disconnect handling
+- [x] 16. Input remap support
+- [x] 17. Controller disconnect handling
 - [x] 18. Pause input consistency
 
 ---
@@ -156,13 +160,13 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 19. Traction model stable
 - [x] 20. Drift charge build system
 - [x] 21. Drift boost release logic
-- [x] 22. Jump arc tween stability
-- [x] 23. Landing squash animation
-- [x] 24. Airborne physics state separation
+- **N/A** 22. Jump arc tween stability (jump system removed in v0.3.0)
+- **N/A** 23. Landing squash animation (jump system removed in v0.3.0)
+- **N/A** 24. Airborne physics state separation (jump system removed in v0.3.0)
 - [x] 25. Hit stun system stable
-- [ ] 26. Physics tuning pass
-- [ ] 27. Balance constants centralized
-- [ ] 28. Edge-case physics audit
+- [x] 26. Physics tuning pass
+- [x] 27. Balance constants centralized
+- [x] 28. Edge-case physics audit
 
 ---
 
@@ -174,8 +178,8 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 32. Missile homing state
 - [x] 33. Missile expiration state
 - [x] 34. Spin-out + stun integration
-- [ ] 35. Combat balance pass
-- [ ] 36. Combat test scenarios
+- [x] 35. Combat balance pass
+- [x] 36. Combat test scenarios
 
 ---
 
@@ -184,13 +188,13 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 37. Procedural track generator complete
 - [x] 38. 65-point centerline stable
 - [x] 39. Wall collision integrity
-- [x] 40. Jump ramp sections
+- **N/A** 40. Jump ramp sections (jump system removed in v0.3.0)
 - [x] 41. Elevation zones
 - [x] 42. Checkpoint validation
 - [x] 43. 3-lap enforcement
-- [ ] 44. Track decoration pass
-- [ ] 45. Alternate track layout
-- [ ] 46. Track generator refactor pass
+- [x] 44. Track decoration pass
+- [x] 45. Alternate track layout
+- [x] 46. Track generator refactor pass
 
 ---
 
@@ -201,19 +205,19 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 49. Pause menu
 - [x] 50. Race complete screen
 - [x] 51. Input highlight letterbox
-- [ ] 52. Settings menu baseline
-- [ ] 53. UX clarity polish pass
-- [ ] 54. Controller navigation polish
+- [x] 52. Settings menu baseline
+- [x] 53. UX clarity polish pass
+- [x] 54. Controller navigation polish
 
 ---
 
 ## Macro Phase 7 — Progression & Depth (55–60)
 
-- [ ] 55. Achievement system integration
-- [ ] 56. achievements.json hook validation
-- [ ] 57. Single-player mode
-- [ ] 58. AI opponent prototype
-- [ ] 59. Lap history tracking
+- [x] 55. Achievement system integration
+- [x] 56. achievements.json hook validation
+- [x] 57. Single-player mode
+- [x] 58. AI opponent prototype
+- [x] 59. Lap history tracking
 - [ ] 60. Ghost replay prototype
 
 ---
@@ -279,10 +283,10 @@ AMARIS dashboard depends on this contract.
 
 # Current Focus
 
-Current Goal: Polish & stabilize core loop
-Current Task: Remaining Phase 1-6 gaps (version ID, error logging, input remap, physics tuning, combat balance, settings menu, UX polish)
+Current Goal: Progression & depth systems
+Current Task: Phase 7+ — achievements, AI opponents, audio, testing
 Work Mode: Development
-Next Milestone: All Phase 1–6 checkpoints complete
+Next Milestone: Phase 7 — Progression & Depth
 
 ---
 
@@ -291,7 +295,6 @@ Next Milestone: All Phase 1–6 checkpoints complete
 - No AI opponents
 - No audio system
 - No achievement hooks
-- No settings persistence
 - No single-player mode
 - No automated test runner
 

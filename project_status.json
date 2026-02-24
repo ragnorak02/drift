@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "gameId": "drift",
   "title": "Loop Drift Racer",
-  "lastUpdated": "2026-02-19T00:00:00Z",
+  "lastUpdated": "2026-02-24T21:00:00Z",
   "health": {
-    "progressPercent": 63,
-    "buildVersion": "0.1.0",
+    "progressPercent": 88,
+    "buildVersion": "0.3.0",
     "assetStage": "placeholder"
   },
   "tech": {
@@ -16,10 +16,10 @@
   },
   "features": {
     "controllerSupport": "complete",
-    "achievementsSystem": "missing",
+    "achievementsSystem": "complete",
     "testScripts": "missing",
-    "saveSystem": "missing",
-    "settingsMenu": "missing",
+    "saveSystem": "partial",
+    "settingsMenu": "complete",
     "audio": "missing",
     "vfx": "partial"
   },

@@ -1,7 +1,7 @@
 extends Area2D
 
-@export var respawn_time: float = 10.0
-@export var missile_grant: int = 2
+@export var respawn_time: float = GameConstants.MISSILE_RESPAWN_TIME
+@export var missile_grant: int = GameConstants.MISSILE_GRANT_COUNT
 var _active: bool = true
 var _visual: Polygon2D = null
 var _glow: Polygon2D = null
@@ -19,7 +19,7 @@ func _ready() -> void:
 
 	# Glow ring
 	_glow = Polygon2D.new()
-	_glow.polygon = _make_circle(22, 12)
+	_glow.polygon = GameConstants.make_circle(22, 12)
 	_glow.color = Color(1.0, 0.2, 0.1, 0.2)
 	_glow.z_index = -1
 	add_child(_glow)
@@ -27,7 +27,7 @@ func _ready() -> void:
 	# Collision shape
 	var col := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
-	shape.radius = 25.0
+	shape.radius = GameConstants.ITEM_COLLISION_RADIUS
 	col.shape = shape
 	add_child(col)
 
@@ -50,9 +50,3 @@ func _on_body_entered(body: Node2D) -> void:
 		_visual.visible = true
 		_glow.visible = true
 
-func _make_circle(radius: float, segments: int) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for i in segments:
-		var angle := TAU * i / segments
-		points.append(Vector2(cos(angle) * radius, sin(angle) * radius))
-	return points

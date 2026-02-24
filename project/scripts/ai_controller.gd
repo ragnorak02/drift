@@ -2,6 +2,7 @@ extends Node
 
 ## AI path-following controller — attach as child of a CarPlayer node.
 ## Reads track centerline and steers toward a lookahead point.
+## Drifts on sharp turns for speed advantage.
 
 var _car: CharacterBody2D = null
 var _centerline: Array[Vector2] = []
@@ -62,9 +63,16 @@ func _physics_process(delta: float) -> void:
 	if turn_angle > SHARP_TURN:
 		_car.ai_throttle = 0.4
 		_car.ai_brake = 0.3
+		# Drift on sharp turns for speed advantage
+		if _car.current_speed > _car.drift_min_speed:
+			_car.ai_drift_strength = 1.0
+		else:
+			_car.ai_drift_strength = 0.0
 	else:
 		_car.ai_throttle = 1.0
 		_car.ai_brake = 0.0
+		# Release drift after passing turn apex
+		_car.ai_drift_strength = 0.0
 
 	# Combat — fire missiles when opponent is ahead and close
 	if _other_car and _car.missile_count > 0:

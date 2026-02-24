@@ -309,31 +309,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
 theme_override_font_sizes/font_size = 9
-text = "LShift / LT"
-horizontal_alignment = 1
-
-[node name="JumpCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="JumpHint" type="PanelContainer" parent="ControlLetterbox/HBox/JumpCol"]
-layout_mode = 2
-script = ExtResource("2_highlight")
-action_name = "jump"
-label_text = "JUMP"
-
-[node name="Label" type="Label" parent="ControlLetterbox/HBox/JumpCol/JumpHint"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "JUMP"
-horizontal_alignment = 1
-
-[node name="JumpMap" type="Label" parent="ControlLetterbox/HBox/JumpCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 0.8)
-theme_override_font_sizes/font_size = 9
-text = "Space / RT"
+text = "LShift/Space / LT/RT"
 horizontal_alignment = 1
 
 [node name="ItemCol" type="VBoxContainer" parent="ControlLetterbox/HBox"]

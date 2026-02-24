@@ -2,11 +2,11 @@ extends Area2D
 
 enum State { LAUNCH, HOMING, EXPIRED }
 
-@export var launch_speed: float = 1800.0
-@export var homing_speed: float = 1400.0
-@export var homing_turn_rate: float = 2.5
-@export var launch_duration: float = 1.0
-@export var homing_duration: float = 4.0
+@export var launch_speed: float = GameConstants.MISSILE_LAUNCH_SPEED
+@export var homing_speed: float = GameConstants.MISSILE_HOMING_SPEED
+@export var homing_turn_rate: float = GameConstants.MISSILE_HOMING_TURN_RATE
+@export var launch_duration: float = GameConstants.MISSILE_LAUNCH_DURATION
+@export var homing_duration: float = GameConstants.MISSILE_HOMING_DURATION
 
 var state: int = State.LAUNCH
 var direction: Vector2 = Vector2.UP
@@ -30,7 +30,7 @@ func _ready() -> void:
 
 	# Pulsing glow
 	_glow = Polygon2D.new()
-	_glow.polygon = _make_circle(14, 10)
+	_glow.polygon = GameConstants.make_circle(14, 10)
 	_glow.color = Color(1.0, 0.4, 0.1, 0.3)
 	_glow.z_index = -1
 	add_child(_glow)
@@ -49,7 +49,7 @@ func _ready() -> void:
 	# Collision shape
 	var col := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
-	shape.radius = 12.0
+	shape.radius = GameConstants.MISSILE_COLLISION_RADIUS
 	col.shape = shape
 	add_child(col)
 
@@ -109,9 +109,3 @@ func _expire() -> void:
 	tw.tween_interval(0.3)
 	tw.tween_callback(queue_free)
 
-func _make_circle(radius: float, segments: int) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for i in segments:
-		var angle := TAU * i / segments
-		points.append(Vector2(cos(angle) * radius, sin(angle) * radius))
-	return points
