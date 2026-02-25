@@ -20,14 +20,13 @@ static var selected_track: int = 0
 # Player count — shared via static var so race_manager can read it
 static var player_count: int = 2
 
-var _track_label: Label = null
-var _mode_label: Label = null
+var _track_button: Button = null
+var _mode_button: Button = null
 
 func _ready() -> void:
 	SettingsManager.load_settings()
 
 	settings_panel.visible = false
-	new_run_button.grab_focus()
 
 	new_run_button.pressed.connect(_on_new_run)
 	settings_button.pressed.connect(_on_settings)
@@ -43,9 +42,9 @@ func _ready() -> void:
 	zoom_slider.value = SettingsManager.camera_zoom_offset
 
 	# Connect slider changes
-	master_slider.value_changed.connect(func(v): SettingsManager.master_volume = v)
-	sfx_slider.value_changed.connect(func(v): SettingsManager.sfx_volume = v)
-	music_slider.value_changed.connect(func(v): SettingsManager.music_volume = v)
+	master_slider.value_changed.connect(func(v): SettingsManager.master_volume = v; SettingsManager.apply_audio())
+	sfx_slider.value_changed.connect(func(v): SettingsManager.sfx_volume = v; SettingsManager.apply_audio())
+	music_slider.value_changed.connect(func(v): SettingsManager.music_volume = v; SettingsManager.apply_audio())
 	deadzone_slider.value_changed.connect(func(v): SettingsManager.controller_deadzone = v)
 	zoom_slider.value_changed.connect(func(v): SettingsManager.camera_zoom_offset = v)
 
@@ -55,12 +54,6 @@ func _ready() -> void:
 	_apply_gold_focus(exit_button)
 	_apply_gold_focus(reset_button)
 	_apply_gold_focus(close_button)
-
-	# Set focus neighbors for proper controller navigation
-	new_run_button.focus_neighbor_bottom = settings_button.get_path()
-	settings_button.focus_neighbor_top = new_run_button.get_path()
-	settings_button.focus_neighbor_bottom = exit_button.get_path()
-	exit_button.focus_neighbor_top = settings_button.get_path()
 
 	# Version label (bottom-right)
 	var ver := Label.new()
@@ -77,91 +70,49 @@ func _ready() -> void:
 	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(ver)
 
-	# Track selection toggle — inserted before the New Run button
+	# Track selection — single button showing "< Track Name >"
 	var vbox: VBoxContainer = %NewRunButton.get_parent()
-	var track_hbox := HBoxContainer.new()
-	track_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	track_hbox.add_theme_constant_override("separation", 10)
 
-	var track_prev := Button.new()
-	track_prev.name = "TrackPrev"
-	track_prev.text = "<"
-	track_prev.custom_minimum_size = Vector2(40, 35)
-	track_prev.pressed.connect(_on_track_prev)
-	_apply_gold_focus(track_prev)
-	track_hbox.add_child(track_prev)
-
-	_track_label = Label.new()
-	_track_label.add_theme_color_override("font_color", Color(0.941, 0.784, 0.314, 1))
-	_track_label.add_theme_font_size_override("font_size", 18)
-	_track_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_track_label.custom_minimum_size = Vector2(200, 0)
-	track_hbox.add_child(_track_label)
-
-	var track_next := Button.new()
-	track_next.name = "TrackNext"
-	track_next.text = ">"
-	track_next.custom_minimum_size = Vector2(40, 35)
-	track_next.pressed.connect(_on_track_next)
-	_apply_gold_focus(track_next)
-	track_hbox.add_child(track_next)
-
-	# Insert before the NewRunButton (index 2 = after Title + Spacer)
-	vbox.add_child(track_hbox)
-	vbox.move_child(track_hbox, 2)
+	_track_button = Button.new()
+	_track_button.name = "TrackSelector"
+	_track_button.custom_minimum_size = Vector2(300, 40)
+	_track_button.pressed.connect(_on_track_next)
+	_apply_gold_focus(_track_button)
+	vbox.add_child(_track_button)
+	vbox.move_child(_track_button, 2)  # After Title + Spacer
 	_update_track_label()
 
-	# Mode selection toggle (1 Player / 2 Player) — inserted after track selector
-	var mode_hbox := HBoxContainer.new()
-	mode_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	mode_hbox.add_theme_constant_override("separation", 10)
-
-	var mode_prev := Button.new()
-	mode_prev.name = "ModePrev"
-	mode_prev.text = "<"
-	mode_prev.custom_minimum_size = Vector2(40, 35)
-	mode_prev.pressed.connect(_on_mode_toggle)
-	_apply_gold_focus(mode_prev)
-	mode_hbox.add_child(mode_prev)
-
-	_mode_label = Label.new()
-	_mode_label.add_theme_color_override("font_color", Color(0.941, 0.784, 0.314, 1))
-	_mode_label.add_theme_font_size_override("font_size", 18)
-	_mode_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_mode_label.custom_minimum_size = Vector2(200, 0)
-	mode_hbox.add_child(_mode_label)
-
-	var mode_next := Button.new()
-	mode_next.name = "ModeNext"
-	mode_next.text = ">"
-	mode_next.custom_minimum_size = Vector2(40, 35)
-	mode_next.pressed.connect(_on_mode_toggle)
-	_apply_gold_focus(mode_next)
-	mode_hbox.add_child(mode_next)
-
-	# Insert after track selector (index 3)
-	vbox.add_child(mode_hbox)
-	vbox.move_child(mode_hbox, 3)
+	# Mode selection — single button showing "< 1 Player >" / "< 2 Player >"
+	_mode_button = Button.new()
+	_mode_button.name = "ModeSelector"
+	_mode_button.custom_minimum_size = Vector2(300, 40)
+	_mode_button.pressed.connect(_on_mode_toggle)
+	_apply_gold_focus(_mode_button)
+	vbox.add_child(_mode_button)
+	vbox.move_child(_mode_button, 3)  # After track selector
 	_update_mode_label()
 
-	# Wire focus neighbors for full menu:
-	# TrackSelector <-> ModeSelector <-> NewRun <-> Settings <-> Exit (wraps)
-	track_prev.focus_neighbor_top = exit_button.get_path()
-	track_prev.focus_neighbor_bottom = mode_prev.get_path()
-	track_prev.focus_neighbor_right = track_next.get_path()
-	track_next.focus_neighbor_top = exit_button.get_path()
-	track_next.focus_neighbor_bottom = mode_next.get_path()
-	track_next.focus_neighbor_left = track_prev.get_path()
+	# --- Vertical focus chain: Track → Mode → NewRun → Settings → Exit (wraps) ---
+	var menu_buttons: Array[Control] = [_track_button, _mode_button, new_run_button, settings_button, exit_button]
+	for i in menu_buttons.size():
+		var btn := menu_buttons[i]
+		var prev := menu_buttons[(i - 1 + menu_buttons.size()) % menu_buttons.size()]
+		var next := menu_buttons[(i + 1) % menu_buttons.size()]
+		btn.focus_neighbor_top = prev.get_path()
+		btn.focus_neighbor_bottom = next.get_path()
+		# Lock left/right to self — prevents horizontal stick from escaping
+		btn.focus_neighbor_left = btn.get_path()
+		btn.focus_neighbor_right = btn.get_path()
 
-	mode_prev.focus_neighbor_top = track_prev.get_path()
-	mode_prev.focus_neighbor_bottom = new_run_button.get_path()
-	mode_prev.focus_neighbor_right = mode_next.get_path()
-	mode_next.focus_neighbor_top = track_next.get_path()
-	mode_next.focus_neighbor_bottom = new_run_button.get_path()
-	mode_next.focus_neighbor_left = mode_prev.get_path()
+	# Give initial focus to track selector (top of chain)
+	_track_button.grab_focus()
 
-	new_run_button.focus_neighbor_top = mode_prev.get_path()
-	exit_button.focus_neighbor_bottom = track_prev.get_path()
+	# Start menu music
+	AudioManager.start_menu_music()
+
+	# Navigate sounds on focus changes
+	for btn: Control in [_track_button, _mode_button, new_run_button, settings_button, exit_button, reset_button, close_button]:
+		btn.focus_entered.connect(AudioManager.play_menu_navigate)
 
 func _apply_gold_focus(ctrl: Control) -> void:
 	var focus_style := StyleBoxFlat.new()
@@ -176,10 +127,13 @@ func _apply_gold_focus(ctrl: Control) -> void:
 	ctrl.add_theme_stylebox_override("focus", focus_style)
 
 func _on_new_run() -> void:
+	AudioManager.play_menu_select()
+	AudioManager.stop_menu_music()
 	SettingsManager.save_settings()
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
 func _on_settings() -> void:
+	AudioManager.play_menu_select()
 	settings_panel.visible = not settings_panel.visible
 	if settings_panel.visible:
 		master_slider.grab_focus()
@@ -200,8 +154,25 @@ func _on_reset_defaults() -> void:
 	zoom_slider.value = SettingsManager.camera_zoom_offset
 
 func _on_exit() -> void:
+	AudioManager.play_menu_select()
 	SettingsManager.save_settings()
 	get_tree().quit()
+
+func _input(event: InputEvent) -> void:
+	if settings_panel.visible:
+		return
+	# Left/right on track or mode selector cycles the value
+	if _track_button != null and _track_button.has_focus():
+		if event.is_action_pressed("ui_left"):
+			_on_track_prev()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_right"):
+			_on_track_next()
+			get_viewport().set_input_as_handled()
+	elif _mode_button != null and _mode_button.has_focus():
+		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
+			_on_mode_toggle()
+			get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Allow LB/RB (shoulder buttons) to cycle tracks from anywhere in menu
@@ -225,11 +196,12 @@ func _on_track_next() -> void:
 
 func _update_track_label() -> void:
 	var names := ["Track 1: Grand Circuit", "Track 2: Figure Eight"]
-	_track_label.text = names[selected_track]
+	_track_button.text = "<  %s  >" % names[selected_track]
 
 func _on_mode_toggle() -> void:
 	player_count = 1 if player_count == 2 else 2
 	_update_mode_label()
 
 func _update_mode_label() -> void:
-	_mode_label.text = "1 Player" if player_count == 1 else "2 Player"
+	var label := "1 Player" if player_count == 1 else "2 Player"
+	_mode_button.text = "<  %s  >" % label
