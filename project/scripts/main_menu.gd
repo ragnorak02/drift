@@ -22,6 +22,10 @@ static var player_count: int = 2
 
 var _track_button: Button = null
 var _mode_button: Button = null
+var _menu_buttons: Array[Control] = []
+var _focus_index: int = 0
+var _nav_cooldown: float = 0.0
+const NAV_COOLDOWN_TIME: float = 0.2
 
 func _ready() -> void:
 	SettingsManager.load_settings()
@@ -92,19 +96,15 @@ func _ready() -> void:
 	vbox.move_child(_mode_button, 3)  # After track selector
 	_update_mode_label()
 
-	# --- Vertical focus chain: Track → Mode → NewRun → Settings → Exit (wraps) ---
-	var menu_buttons: Array[Control] = [_track_button, _mode_button, new_run_button, settings_button, exit_button]
-	for i in menu_buttons.size():
-		var btn := menu_buttons[i]
-		var prev := menu_buttons[(i - 1 + menu_buttons.size()) % menu_buttons.size()]
-		var next := menu_buttons[(i + 1) % menu_buttons.size()]
-		btn.focus_neighbor_top = prev.get_path()
-		btn.focus_neighbor_bottom = next.get_path()
-		# Lock left/right to self — prevents horizontal stick from escaping
-		btn.focus_neighbor_left = btn.get_path()
-		btn.focus_neighbor_right = btn.get_path()
+	# --- Manual focus control: Track → Mode → NewRun → Settings → Exit ---
+	_menu_buttons = [_track_button, _mode_button, new_run_button, settings_button, exit_button]
+	# Disable Godot's built-in focus neighbors so they can't interfere
+	for btn in _menu_buttons:
+		btn.focus_mode = Control.FOCUS_CLICK
 
 	# Give initial focus to track selector (top of chain)
+	_focus_index = 0
+	_track_button.focus_mode = Control.FOCUS_ALL
 	_track_button.grab_focus()
 
 	# Start menu music
@@ -113,6 +113,10 @@ func _ready() -> void:
 	# Navigate sounds on focus changes
 	for btn: Control in [_track_button, _mode_button, new_run_button, settings_button, exit_button, reset_button, close_button]:
 		btn.focus_entered.connect(AudioManager.play_menu_navigate)
+
+func _process(delta: float) -> void:
+	if _nav_cooldown > 0.0:
+		_nav_cooldown -= delta
 
 func _apply_gold_focus(ctrl: Control) -> void:
 	var focus_style := StyleBoxFlat.new()
@@ -138,12 +142,12 @@ func _on_settings() -> void:
 	if settings_panel.visible:
 		master_slider.grab_focus()
 	else:
-		settings_button.grab_focus()
+		_set_focus(3)  # Settings button is index 3
 
 func _on_close_settings() -> void:
 	SettingsManager.save_settings()
 	settings_panel.visible = false
-	settings_button.grab_focus()
+	_set_focus(3)  # Settings button is index 3
 
 func _on_reset_defaults() -> void:
 	SettingsManager.reset_defaults()
@@ -158,21 +162,62 @@ func _on_exit() -> void:
 	SettingsManager.save_settings()
 	get_tree().quit()
 
+func _set_focus(index: int) -> void:
+	# Restore old button to click-only so Godot won't navigate to it
+	_menu_buttons[_focus_index].focus_mode = Control.FOCUS_CLICK
+	_focus_index = index
+	# Enable focus on new button and grab it for the gold border visual
+	_menu_buttons[_focus_index].focus_mode = Control.FOCUS_ALL
+	_menu_buttons[_focus_index].grab_focus()
+
 func _input(event: InputEvent) -> void:
 	if settings_panel.visible:
 		return
-	# Left/right on track or mode selector cycles the value
-	if _track_button != null and _track_button.has_focus():
-		if event.is_action_pressed("ui_left"):
+	if _menu_buttons.is_empty():
+		return
+
+	# Navigation cooldown — consume nav events while cooling down
+	if _nav_cooldown > 0.0:
+		if event.is_action_pressed("ui_down") or event.is_action_pressed("ui_up") \
+			or event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
+			get_viewport().set_input_as_handled()
+			return
+
+	# --- Vertical navigation (consume to block Godot's focus system) ---
+	if event.is_action_pressed("ui_down"):
+		_set_focus((_focus_index + 1) % _menu_buttons.size())
+		_nav_cooldown = NAV_COOLDOWN_TIME
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("ui_up"):
+		_set_focus((_focus_index - 1 + _menu_buttons.size()) % _menu_buttons.size())
+		_nav_cooldown = NAV_COOLDOWN_TIME
+		get_viewport().set_input_as_handled()
+		return
+
+	# --- Horizontal: cycle value on track/mode, no-op on others ---
+	if event.is_action_pressed("ui_left"):
+		if _menu_buttons[_focus_index] == _track_button:
 			_on_track_prev()
-			get_viewport().set_input_as_handled()
-		elif event.is_action_pressed("ui_right"):
-			_on_track_next()
-			get_viewport().set_input_as_handled()
-	elif _mode_button != null and _mode_button.has_focus():
-		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
+		elif _menu_buttons[_focus_index] == _mode_button:
 			_on_mode_toggle()
-			get_viewport().set_input_as_handled()
+		_nav_cooldown = NAV_COOLDOWN_TIME
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("ui_right"):
+		if _menu_buttons[_focus_index] == _track_button:
+			_on_track_next()
+		elif _menu_buttons[_focus_index] == _mode_button:
+			_on_mode_toggle()
+		_nav_cooldown = NAV_COOLDOWN_TIME
+		get_viewport().set_input_as_handled()
+		return
+
+	# --- Accept: activate the focused button ---
+	if event.is_action_pressed("ui_accept"):
+		_menu_buttons[_focus_index].emit_signal("pressed")
+		get_viewport().set_input_as_handled()
+		return
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Allow LB/RB (shoulder buttons) to cycle tracks from anywhere in menu
@@ -187,15 +232,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _on_track_prev() -> void:
-	selected_track = (selected_track - 1 + 2) % 2
+	selected_track = (selected_track - 1 + 3) % 3
 	_update_track_label()
 
 func _on_track_next() -> void:
-	selected_track = (selected_track + 1) % 2
+	selected_track = (selected_track + 1) % 3
 	_update_track_label()
 
 func _update_track_label() -> void:
-	var names := ["Track 1: Grand Circuit", "Track 2: Figure Eight"]
+	var names := ["Track 1: Grand Circuit", "Track 2: Figure Eight", "Track 3: Off-Road Circuit"]
 	_track_button.text = "<  %s  >" % names[selected_track]
 
 func _on_mode_toggle() -> void:

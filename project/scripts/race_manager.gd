@@ -15,6 +15,8 @@ var _connected_devices: Array[int] = []
 var _controller_paused: bool = false
 var _overhead_camera: Camera2D = null
 var _player_count: int = 2
+var _ghost_recorder: Node = null
+var _ghost_player: Node2D = null
 
 func _ready() -> void:
 	# Read player count from main menu
@@ -24,6 +26,11 @@ func _ready() -> void:
 
 	# Position cars at track start line
 	_position_cars_at_start()
+
+	# Set checkpoint count from track data (overrides default of 4)
+	var cp_count: int = track.checkpoint_indices.size()
+	lap_manager.total_checkpoints = cp_count
+	lap_manager2.total_checkpoints = cp_count
 
 	if _player_count == 2:
 		# -- 2-Player mode --
@@ -57,6 +64,18 @@ func _ready() -> void:
 		# Connect drift boost signals for screen shake
 		car.drift_released.connect(_on_drift_boost_released)
 		car2.drift_released.connect(_on_drift_boost_released)
+
+		# Audio wiring
+		car.speed_changed.connect(func(s): AudioManager.set_engine_state(1, s, GameConstants.CAR_MAX_SPEED))
+		car2.speed_changed.connect(func(s): AudioManager.set_engine_state(2, s, GameConstants.CAR_MAX_SPEED))
+		car.drift_started.connect(AudioManager.start_drift)
+		car.drift_tier_changed.connect(AudioManager.set_drift_tier)
+		car.drift_released.connect(func(bs): AudioManager.play_boost(bs); AudioManager.stop_drift())
+		car2.drift_started.connect(AudioManager.start_drift)
+		car2.drift_tier_changed.connect(AudioManager.set_drift_tier)
+		car2.drift_released.connect(func(bs): AudioManager.play_boost(bs); AudioManager.stop_drift())
+		car.missile_fired.connect(func(_a, _b, _c, _d): AudioManager.play_missile_launch())
+		car2.missile_fired.connect(func(_a, _b, _c, _d): AudioManager.play_missile_launch())
 
 		# Achievement system wiring
 		AchievementManager.clear_callbacks()
@@ -93,6 +112,13 @@ func _ready() -> void:
 		car.missile_fired.connect(_on_missile_fired)
 		car.drift_released.connect(_on_drift_boost_released)
 
+		# Audio wiring (P1 only)
+		car.speed_changed.connect(func(s): AudioManager.set_engine_state(1, s, GameConstants.CAR_MAX_SPEED))
+		car.drift_started.connect(AudioManager.start_drift)
+		car.drift_tier_changed.connect(AudioManager.set_drift_tier)
+		car.drift_released.connect(func(bs): AudioManager.play_boost(bs); AudioManager.stop_drift())
+		car.missile_fired.connect(func(_a, _b, _c, _d): AudioManager.play_missile_launch())
+
 		# Achievement system wiring (P1 only)
 		AchievementManager.clear_callbacks()
 		AchievementManager.register_unlock_callback(ui.show_achievement_toast)
@@ -105,6 +131,9 @@ func _ready() -> void:
 
 	# Set up overhead camera showing entire track
 	_setup_overhead_camera()
+
+	# Set up ghost replay system
+	_setup_ghost_system()
 
 	# Start countdown then race
 	_start_race_sequence()
@@ -141,14 +170,45 @@ func _setup_overhead_camera() -> void:
 	_overhead_camera = cam
 	# Compute camera from track bounding box
 	var bbox: Rect2 = track.get_bounding_box()
-	cam.position = bbox.position + bbox.size * 0.5
-	var viewport_size: Vector2 = Vector2(1280, 720)
-	var zoom_x: float = viewport_size.x / (bbox.size.x + 600)
-	var zoom_y: float = viewport_size.y / (bbox.size.y + 600)
-	var zoom_val := minf(zoom_x, zoom_y) * 0.9 + SettingsManager.camera_zoom_offset
-	cam.zoom = Vector2(zoom_val, zoom_val)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if bbox.size.x < 100 or bbox.size.y < 100:
+		# Fallback: center on track start point with default zoom
+		push_warning("[Camera] Track bbox too small (%.0fx%.0f) — using fallback" % [bbox.size.x, bbox.size.y])
+		cam.position = track.centerline[0] if not track.centerline.is_empty() else Vector2(640, 360)
+		cam.zoom = Vector2(0.5, 0.5)
+	else:
+		cam.position = bbox.position + bbox.size * 0.5
+		var zoom_x: float = viewport_size.x / (bbox.size.x + 600)
+		var zoom_y: float = viewport_size.y / (bbox.size.y + 600)
+		var zoom_val := minf(zoom_x, zoom_y) * 0.9 + SettingsManager.camera_zoom_offset
+		cam.zoom = Vector2(zoom_val, zoom_val)
 	cam.enabled = true
 	add_child(cam)
+
+func _setup_ghost_system() -> void:
+	# Attach recorder to P1 car
+	_ghost_recorder = preload("res://scripts/ghost_recorder.gd").new()
+	car.add_child(_ghost_recorder)
+
+	# Load existing ghost for this track
+	var ghost_data: Dictionary = GhostData.load_ghost(track.track_index)
+	if not ghost_data.is_empty():
+		var player_node := preload("res://scripts/ghost_player.gd").new()
+		add_child(player_node)
+		player_node.load_frames(ghost_data.frames)
+		_ghost_player = player_node
+		print("[Ghost] Ghost loaded for track %d — %.2fs" % [track.track_index, ghost_data.total_time])
+
+func _save_ghost_if_better() -> void:
+	if not _ghost_recorder:
+		return
+	_ghost_recorder.stop_recording()
+	var frames: Array = _ghost_recorder.get_frames()
+	if frames.is_empty():
+		return
+	var total_time: float = lap_manager.total_race_time
+	var best_lap: float = lap_manager.best_lap_time
+	GhostData.save_ghost(track.track_index, total_time, best_lap, frames)
 
 func _start_race_sequence() -> void:
 	car.race_started = false
@@ -156,11 +216,17 @@ func _start_race_sequence() -> void:
 		car2.race_started = false
 	await ui.show_countdown()
 	print("[Race] Race started — %d player(s)" % _player_count)
+	AudioManager.start_race_music()
 	car.start_race()
 	lap_manager.start_race()
 	if _player_count == 2:
 		car2.start_race()
 		lap_manager2.start_race()
+	# Start ghost recording and playback
+	if _ghost_recorder:
+		_ghost_recorder.start_recording()
+	if _ghost_player:
+		_ghost_player.start_playback()
 	# Track connected controllers after race starts (avoids false triggers during init)
 	for device_id in Input.get_connected_joypads():
 		_connected_devices.append(device_id)
@@ -169,7 +235,15 @@ func _start_race_sequence() -> void:
 func _on_race_finished(total_time: float, best_lap: float, player_id: int) -> void:
 	if _race_winner == 0:
 		_race_winner = player_id
+		AudioManager.stop_race_music()
+		AudioManager.stop_engine(1)
+		AudioManager.stop_engine(2)
 		car.stop_race()
+
+		# Stop ghost and save if better
+		_save_ghost_if_better()
+		if _ghost_player:
+			_ghost_player.stop_playback()
 
 		if _player_count == 1:
 			# -- Single-player race end --

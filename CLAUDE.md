@@ -107,6 +107,7 @@ logger.gd — Timestamped logging utility (class_name Logger)
 input_remapper.gd — Input remap framework (class_name InputRemapper)
 settings_manager.gd — Settings persistence (class_name SettingsManager)
 lap_history.gd — Lap time persistence + PB tracking (class_name LapHistory)
+audio_manager.gd — Procedural audio singleton (class_name AudioManager, autoload)
 
 ---
 
@@ -218,16 +219,16 @@ AMARIS STANDARD — 70 Checkpoints
 - [x] 57. Single-player mode
 - [x] 58. AI opponent prototype
 - [x] 59. Lap history tracking
-- [ ] 60. Ghost replay prototype
+- [x] 60. Ghost replay prototype
 
 ---
 
 ## Macro Phase 8 — Audio & Feedback (61–64)
 
-- [ ] 61. Engine SFX
-- [ ] 62. Drift SFX
-- [ ] 63. Missile SFX
-- [ ] 64. Music integration
+- [x] 61. Engine SFX
+- [x] 62. Drift SFX
+- [x] 63. Missile SFX
+- [x] 64. Music integration
 
 ---
 
@@ -283,19 +284,15 @@ AMARIS dashboard depends on this contract.
 
 # Current Focus
 
-Current Goal: Progression & depth systems
-Current Task: Phase 7+ — achievements, AI opponents, audio, testing
+Current Goal: Testing & automation
+Current Task: Phase 9 — headless smoke test, test_results.json, performance
 Work Mode: Development
-Next Milestone: Phase 7 — Progression & Depth
+Next Milestone: Phase 9 — Testing & Automation
 
 ---
 
 # Known Gaps
 
-- No AI opponents
-- No audio system
-- No achievement hooks
-- No single-player mode
 - No automated test runner
 
 ---

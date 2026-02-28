@@ -23,6 +23,13 @@ func _ready() -> void:
 	if menu_script and "selected_track" in menu_script:
 		track_index = menu_script.selected_track
 	_load_track_layout(track_index)
+	if centerline.is_empty():
+		push_error("[Track] Centerline empty after loading track %d — falling back to Track 1" % track_index)
+		track_index = 0
+		_load_track_1()
+	if centerline.is_empty():
+		push_error("[Track] Track 1 centerline also empty — cannot build track")
+		return
 	_compute_edges()
 	_build_background()
 	_build_road_quads()
@@ -36,10 +43,13 @@ func _ready() -> void:
 	print("[Track] Track %d built — %d centerline points, %d checkpoints" % [track_index, centerline.size(), checkpoint_indices.size()])
 
 func _load_track_layout(idx: int) -> void:
-	if idx == 1:
-		_load_track_2()
-	else:
-		_load_track_1()
+	match idx:
+		1:
+			_load_track_2()
+		2:
+			_load_track_3()
+		_:
+			_load_track_1()
 
 func _load_track_1() -> void:
 	# Track 1: Grand Circuit — wide sweeping turns for drift flow
@@ -160,6 +170,68 @@ func _load_track_2() -> void:
 		[30, 35, Color(0.35, 0.35, 0.40, 1)],   # Upper right loop (elevated)
 	]
 
+func _load_track_3() -> void:
+	# Track 3: Off-Road Circuit — compact technical circuit inspired by Super Off Road (NES)
+	# Tight hairpins, switchbacks, and short straights in a dense layout
+	centerline.assign([
+		# Start/finish straight (heading right)
+		Vector2(700, 800),        # 0 — finish line
+		Vector2(1000, 790),       # 1
+		Vector2(1300, 770),       # 2
+		# Hairpin 1 — sharp right turn
+		Vector2(1550, 800),       # 3
+		Vector2(1750, 900),       # 4
+		Vector2(1850, 1100),      # 5
+		Vector2(1800, 1300),      # 6
+		Vector2(1650, 1450),      # 7
+		# Switchback heading left
+		Vector2(1400, 1500),      # 8
+		Vector2(1100, 1520),      # 9
+		Vector2(850, 1480),       # 10
+		# Hairpin 2 — sharp left turn going down
+		Vector2(700, 1550),       # 11
+		Vector2(650, 1750),       # 12
+		Vector2(700, 1950),       # 13
+		Vector2(850, 2100),       # 14
+		# Chicane section — quick left-right-left
+		Vector2(1050, 2180),      # 15
+		Vector2(1300, 2130),      # 16
+		Vector2(1500, 2200),      # 17
+		Vector2(1700, 2300),      # 18
+		# Hairpin 3 — tight right turn
+		Vector2(1900, 2400),      # 19
+		Vector2(2050, 2550),      # 20
+		Vector2(2100, 2750),      # 21
+		Vector2(2000, 2900),      # 22
+		Vector2(1800, 2950),      # 23
+		# Long return sweep heading left
+		Vector2(1550, 2900),      # 24
+		Vector2(1300, 2800),      # 25
+		Vector2(1050, 2680),      # 26
+		Vector2(850, 2550),       # 27
+		# Bottom-left corner — wide sweeper
+		Vector2(700, 2380),       # 28
+		Vector2(620, 2180),       # 29
+		Vector2(600, 1980),       # 30
+		# Straight climb back north
+		Vector2(620, 1750),       # 31
+		Vector2(600, 1500),       # 32
+		Vector2(580, 1280),       # 33
+		# Final corner back to start
+		Vector2(590, 1080),       # 34
+		Vector2(620, 920),        # 35
+	])
+	checkpoint_indices = [5, 12, 20, 27, 33]
+	boost_positions.assign([
+		Vector2(1300, 770), Vector2(1100, 1520),
+		Vector2(1500, 2200), Vector2(1050, 2680),
+	])
+	missile_positions.assign([
+		Vector2(1750, 900), Vector2(850, 2100),
+		Vector2(1800, 2950),
+	])
+	_elevation_zones = []
+
 func _compute_edges() -> void:
 	var n := centerline.size()
 	_outer_points.clear()
@@ -186,6 +258,8 @@ func _compute_edges() -> void:
 		_inner_points.append(curr - perp * TRACK_WIDTH * 0.5 * miter)
 
 func _build_background() -> void:
+	if centerline.is_empty():
+		return
 	# Compute bounding box from centerline for dynamic background
 	var min_p: Vector2 = centerline[0]
 	var max_p: Vector2 = centerline[0]
@@ -464,6 +538,8 @@ func _build_items() -> void:
 		add_child(item)
 
 func _build_start_line() -> void:
+	if centerline.size() < 2:
+		return
 	var preload_cp := load("res://scripts/checkpoint.gd")
 
 	var pos := centerline[0]

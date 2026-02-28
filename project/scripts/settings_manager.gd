@@ -41,8 +41,7 @@ static func reset_defaults() -> void:
 	print("[Settings] Settings reset to defaults")
 
 static func apply_audio() -> void:
-	# Placeholder — will apply to AudioServer buses when audio is implemented
-	pass
+	AudioManager.apply_volumes()
 
 static func get_deadzone() -> float:
 	return controller_deadzone

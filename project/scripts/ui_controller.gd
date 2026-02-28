@@ -244,6 +244,7 @@ func show_countdown() -> void:
 	countdown_label.visible = true
 	for num in ["3", "2", "1"]:
 		countdown_label.text = num
+		AudioManager.play_countdown_beep(false)
 		# Scale-pulse: start big, settle to normal
 		countdown_label.scale = Vector2(1.5, 1.5)
 		countdown_label.pivot_offset = countdown_label.size * 0.5
@@ -252,6 +253,7 @@ func show_countdown() -> void:
 			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 		await get_tree().create_timer(1.0).timeout
 	countdown_label.text = "GO!"
+	AudioManager.play_countdown_beep(true)
 	countdown_label.scale = Vector2(1.5, 1.5)
 	var go_tw := create_tween()
 	go_tw.tween_property(countdown_label, "scale", Vector2.ONE, 0.3)\

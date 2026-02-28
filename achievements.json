@@ -1,81 +1,81 @@
 {
-  "gameId": "drift",
-  "achievements": [
-    {
-      "id": "first_lap",
-      "name": "First Lap",
-      "description": "Complete your first lap.",
-      "points": 10,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "first_race",
-      "name": "Finish Line",
-      "description": "Complete your first race.",
-      "points": 15,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "drift_king",
-      "name": "Drift King",
-      "description": "Maintain a drift for 3 seconds.",
-      "points": 20,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "speed_demon",
-      "name": "Speed Demon",
-      "description": "Reach maximum speed.",
-      "points": 15,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "clean_run",
-      "name": "Clean Run",
-      "description": "Complete a race without hitting any walls.",
-      "points": 25,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "checkpoint_ace",
-      "name": "Checkpoint Ace",
-      "description": "Hit every checkpoint in a single lap.",
-      "points": 10,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "personal_best",
-      "name": "Personal Best",
-      "description": "Beat your previous best lap time.",
-      "points": 20,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    },
-    {
-      "id": "track_master",
-      "name": "Track Master",
-      "description": "Complete 10 total races.",
-      "points": 30,
-      "icon": "project/icon.svg",
-      "unlocked": false,
-      "unlockedAt": null
-    }
-  ],
-  "meta": {
-    "totalPointsEarned": 0,
-    "lastUpdated": "2026-02-17T00:00:00.000Z"
-  }
+	"achievements": [
+		{
+			"description": "Complete your first lap.",
+			"icon": "project/icon.svg",
+			"id": "first_lap",
+			"name": "First Lap",
+			"points": 10.0,
+			"unlocked": true,
+			"unlockedAt": "2026-02-28T14:27:00.000Z"
+		},
+		{
+			"description": "Complete your first race.",
+			"icon": "project/icon.svg",
+			"id": "first_race",
+			"name": "Finish Line",
+			"points": 15.0,
+			"unlocked": true,
+			"unlockedAt": "2026-02-28T14:28:00.000Z"
+		},
+		{
+			"description": "Maintain a drift for 3 seconds.",
+			"icon": "project/icon.svg",
+			"id": "drift_king",
+			"name": "Drift King",
+			"points": 20.0,
+			"unlocked": false,
+			"unlockedAt": null
+		},
+		{
+			"description": "Reach maximum speed.",
+			"icon": "project/icon.svg",
+			"id": "speed_demon",
+			"name": "Speed Demon",
+			"points": 15.0,
+			"unlocked": true,
+			"unlockedAt": "2026-02-28T14:27:00.000Z"
+		},
+		{
+			"description": "Complete a race without hitting any walls.",
+			"icon": "project/icon.svg",
+			"id": "clean_run",
+			"name": "Clean Run",
+			"points": 25.0,
+			"unlocked": false,
+			"unlockedAt": null
+		},
+		{
+			"description": "Hit every checkpoint in a single lap.",
+			"icon": "project/icon.svg",
+			"id": "checkpoint_ace",
+			"name": "Checkpoint Ace",
+			"points": 10.0,
+			"unlocked": true,
+			"unlockedAt": "2026-02-28T14:27:00.000Z"
+		},
+		{
+			"description": "Beat your previous best lap time.",
+			"icon": "project/icon.svg",
+			"id": "personal_best",
+			"name": "Personal Best",
+			"points": 20.0,
+			"unlocked": false,
+			"unlockedAt": null
+		},
+		{
+			"description": "Complete 10 total races.",
+			"icon": "project/icon.svg",
+			"id": "track_master",
+			"name": "Track Master",
+			"points": 30.0,
+			"unlocked": false,
+			"unlockedAt": null
+		}
+	],
+	"gameId": "drift",
+	"meta": {
+		"lastUpdated": "2026-02-28T14:28:00.000Z",
+		"totalPointsEarned": 50
+	}
 }

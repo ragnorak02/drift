@@ -96,6 +96,16 @@ const AI_SHARP_TURN_ANGLE := 0.5
 const AI_MISSILE_FIRE_DISTANCE := 800.0
 const AI_ITEM_USE_SPEED := 400.0
 
+# -- Ghost Replay --
+const GHOST_ALPHA := 0.35
+const GHOST_BASE_COLOR := Color(0.8, 0.8, 0.9, 1.0)
+
+# -- Audio --
+const AUDIO_SAMPLE_RATE := 22050
+const ENGINE_BASE_FREQ := 80.0
+const ENGINE_MAX_FREQ := 280.0
+const MUSIC_BPM := 130.0
+
 # -- Speed Cap --
 const ABSOLUTE_MAX_SPEED := 2200.0  # prevents infinite speed stacking
 

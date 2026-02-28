@@ -390,6 +390,7 @@ func _cancel_drift() -> void:
 	drift_tier = 0
 	drift_direction = 0.0
 	is_drifting = false
+	AudioManager.stop_drift()
 	if _spark_l:
 		_spark_l.emitting = false
 	if _spark_r:
@@ -494,6 +495,7 @@ func hit_by_missile(dir: Vector2) -> void:
 	# Red flash
 	_car_sprite.color = Color(1, 0.1, 0.1, 1)
 	_nose_sprite.color = Color(1, 0.1, 0.1, 1)
+	AudioManager.play_missile_hit()
 	# Cancel drift
 	_cancel_drift()
 	# Cancel targeting (missile NOT consumed)
