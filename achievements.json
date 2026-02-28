@@ -24,8 +24,8 @@
 			"id": "drift_king",
 			"name": "Drift King",
 			"points": 20.0,
-			"unlocked": false,
-			"unlockedAt": null
+			"unlocked": true,
+			"unlockedAt": "2026-02-28T20:53:00.000Z"
 		},
 		{
 			"description": "Reach maximum speed.",
@@ -75,7 +75,7 @@
 	],
 	"gameId": "drift",
 	"meta": {
-		"lastUpdated": "2026-02-28T14:28:00.000Z",
-		"totalPointsEarned": 50
+		"lastUpdated": "2026-02-28T20:53:00.000Z",
+		"totalPointsEarned": 70
 	}
 }

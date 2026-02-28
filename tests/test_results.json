@@ -1,9 +1,83 @@
 {
-  "gameId": "drift",
-  "status": "unknown",
-  "testsTotal": 0,
-  "testsPassed": 0,
-  "testsFailed": 0,
-  "details": [],
-  "timestamp": "not yet run"
+	"details": [
+		{
+			"description": "CAR_MAX_SPEED is positive and within ABSOLUTE_MAX_SPEED",
+			"durationMs": 0,
+			"name": "constants_max_speed",
+			"status": "pass"
+		},
+		{
+			"description": "Drift tier times are ordered: TIER_1 < TIER_2 < TIER_3",
+			"durationMs": 0,
+			"name": "constants_drift_thresholds",
+			"status": "pass"
+		},
+		{
+			"description": "Missile durations are positive and homing > launch",
+			"durationMs": 0,
+			"name": "constants_missile_timing",
+			"status": "pass"
+		},
+		{
+			"description": "Track 1 centerline has >= 20 points",
+			"durationMs": 9,
+			"name": "track1_centerline_valid",
+			"status": "pass"
+		},
+		{
+			"description": "Track 2 centerline has >= 30 points",
+			"durationMs": 0,
+			"name": "track2_centerline_valid",
+			"status": "pass"
+		},
+		{
+			"description": "Track 3 centerline has >= 30 points",
+			"durationMs": 0,
+			"name": "track3_centerline_valid",
+			"status": "pass"
+		},
+		{
+			"description": "All checkpoint indices within centerline bounds",
+			"durationMs": 0,
+			"name": "track_checkpoints_in_range",
+			"status": "pass"
+		},
+		{
+			"description": "Ghost save/load round-trip preserves frame data",
+			"durationMs": 11,
+			"name": "ghost_data_round_trip",
+			"status": "pass"
+		},
+		{
+			"description": "SettingsManager default values are correct",
+			"durationMs": 23,
+			"name": "settings_defaults",
+			"status": "pass"
+		},
+		{
+			"description": "achievements.json has required structure and keys",
+			"durationMs": 0,
+			"name": "achievement_json_valid",
+			"status": "pass"
+		},
+		{
+			"description": "Track generation completes in < 500ms per track",
+			"durationMs": 0,
+			"name": "perf_track_generation",
+			"status": "pass"
+		},
+		{
+			"description": "Large track (200+ points) computes edges without error",
+			"durationMs": 0,
+			"name": "stress_large_track",
+			"status": "pass"
+		}
+	],
+	"durationMs": 43,
+	"gameId": "drift",
+	"status": "pass",
+	"testsFailed": 0,
+	"testsPassed": 12,
+	"testsTotal": 12,
+	"timestamp": "2026-02-28T20:30:53"
 }

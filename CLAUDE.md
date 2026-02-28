@@ -234,10 +234,10 @@ AMARIS STANDARD — 70 Checkpoints
 
 ## Macro Phase 9 — Testing & Automation (65–68)
 
-- [ ] 65. Headless smoke test
-- [ ] 66. test_results.json contract
-- [ ] 67. Performance baseline verification
-- [ ] 68. Stress test (large track load)
+- [x] 65. Headless smoke test
+- [x] 66. test_results.json contract
+- [x] 67. Performance baseline verification
+- [x] 68. Stress test (large track load)
 
 ---
 

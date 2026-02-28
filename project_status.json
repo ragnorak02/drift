@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "gameId": "drift",
   "title": "Loop Drift Racer",
-  "lastUpdated": "2026-02-24T21:00:00Z",
+  "lastUpdated": "2026-02-28T12:00:00Z",
   "health": {
     "progressPercent": 88,
     "buildVersion": "0.3.0",
@@ -17,10 +17,10 @@
   "features": {
     "controllerSupport": "complete",
     "achievementsSystem": "complete",
-    "testScripts": "missing",
+    "testScripts": "complete",
     "saveSystem": "partial",
     "settingsMenu": "complete",
-    "audio": "missing",
+    "audio": "complete",
     "vfx": "partial"
   },
   "milestones": {
@@ -32,10 +32,10 @@
     "productionReady": false
   },
   "testing": {
-    "testCommand": null,
-    "lastRunAt": null,
-    "status": "unknown",
-    "notes": "No test runner configured"
+    "testCommand": "Z:/godot/godot.exe --path project --headless --script Z:/Development/amatris/drift/tests/run-tests.gd",
+    "lastRunAt": "2026-02-28T12:00:00Z",
+    "status": "pass",
+    "notes": "12 headless tests covering constants, tracks, ghost replay, settings, achievements, perf, stress"
   },
   "links": {
     "repo": null,
