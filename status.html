@@ -3,93 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loop Drift Racer — Status</title>
+<title>Loop Drift Racer — Status Dashboard</title>
 <style>
-  :root { --bg: #0a0a12; --card: #14141f; --gold: #f0c850; --green: #4caf50; --red: #e74c3c; --orange: #f39c12; --gray: #555; --text: #e0e0e0; }
+  :root {
+    --bg: #0f1923;
+    --card: #1a2836;
+    --border: #2a3f52;
+    --text: #c8d6e5;
+    --accent: #00d2ff;
+    --green: #00e676;
+    --yellow: #ffd740;
+    --red: #ff5252;
+    --orange: #ff9100;
+    --dim: #5a7a94;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
-  h1 { color: var(--gold); margin-bottom: 0.5rem; }
-  .subtitle { color: #888; margin-bottom: 2rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-  .card { background: var(--card); border: 1px solid #222; border-radius: 8px; padding: 1.2rem; }
-  .card h2 { color: var(--gold); font-size: 1rem; margin-bottom: 0.8rem; border-bottom: 1px solid #222; padding-bottom: 0.5rem; }
-  .stat { display: flex; justify-content: space-between; margin: 0.4rem 0; font-size: 0.9rem; }
-  .stat .label { color: #999; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-  .complete { background: var(--green); color: #fff; }
-  .partial { background: var(--orange); color: #fff; }
-  .missing { background: var(--red); color: #fff; }
-  .unknown { background: var(--gray); color: #fff; }
-  .progress-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; margin: 0.5rem 0; }
-  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold), #d4af37); }
-  .milestone { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; font-size: 0.9rem; }
-  .check { color: var(--green); } .cross { color: var(--red); }
-  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-  th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #222; font-size: 0.85rem; }
-  th { color: var(--gold); }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--dim);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .card h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    margin-bottom: 0.75rem;
+  }
+  .card.full { grid-column: 1 / -1; }
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+  }
+  .stat + .stat { border-top: 1px solid var(--border); }
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .done   { background: #00e67622; color: var(--green); }
+  .wip    { background: #ffd74022; color: var(--yellow); }
+  .stub   { background: #ff910022; color: var(--orange); }
+  .none   { background: #ff525222; color: var(--red); }
+  .future { background: #00d2ff18; color: var(--accent); }
+  .bar-wrap {
+    background: #0d1520;
+    border-radius: 4px;
+    height: 8px;
+    margin-top: 0.4rem;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-top: 0.25rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    text-align: left;
+    color: var(--dim);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid #1e2f3f;
+  }
+  .file-count { color: var(--accent); font-weight: 600; }
+  /* Achievements section */
+  .ach-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .ach-header h2 { margin-bottom: 0; }
+  .ach-score {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .ach-score span {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--dim);
+  }
+  .ach-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  .ach-row + .ach-row { border-top: 1px solid var(--border); }
+  .ach-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #0d1520;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+  }
+  .ach-icon.locked { opacity: 0.35; }
+  .ach-info { flex: 1; min-width: 0; }
+  .ach-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ach-desc {
+    font-size: 0.75rem;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ach-pts {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .ach-locked .ach-name { color: var(--dim); }
+  .ach-locked .ach-pts { color: #2a3f52; }
+  #ach-reload {
+    background: var(--border);
+    color: var(--text);
+    border: none;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  #ach-reload:hover { background: var(--dim); }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+  }
 </style>
 </head>
 <body>
 
 <h1>Loop Drift Racer</h1>
-<p class="subtitle">Godot 4.4 | Racing | v0.1.0</p>
+<p class="subtitle">Project Status Dashboard &mdash; Godot 4.4 | 2D Top-Down Drift Combat Racing | v0.3.0</p>
 
+<!-- Phase overview -->
 <div class="grid">
   <div class="card">
-    <h2>Progress</h2>
-    <div class="stat"><span class="label">Completion</span><span>15%</span></div>
-    <div class="progress-bar"><div class="progress-fill" style="width:15%"></div></div>
-    <div class="stat"><span class="label">Phase</span><span>Development</span></div>
-    <div class="stat"><span class="label">Build</span><span>0.1.0</span></div>
-    <div class="stat"><span class="label">Engine</span><span>Godot 4.4</span></div>
-    <div class="stat"><span class="label">Graphics</span><span>2D</span></div>
+    <h2>Current Phase</h2>
+    <div style="font-size:1.6rem;font-weight:700;color:var(--green);">Phase 9</div>
+    <div style="color:var(--dim);font-size:0.85rem;margin-top:0.25rem;">Testing &amp; Automation &mdash; COMPLETE</div>
+    <div class="bar-wrap" style="margin-top:0.6rem;">
+      <div class="bar-fill" style="width:88%;background:var(--green);"></div>
+    </div>
+    <div class="progress-label"><span>Overall Progress</span><span>88%</span></div>
   </div>
-
   <div class="card">
-    <h2>Features</h2>
-    <div class="stat"><span class="label">Controller Support</span><span class="badge complete">Complete</span></div>
-    <div class="stat"><span class="label">VFX</span><span class="badge partial">Partial</span></div>
-    <div class="stat"><span class="label">Achievements</span><span class="badge missing">Missing</span></div>
-    <div class="stat"><span class="label">Test Scripts</span><span class="badge missing">Missing</span></div>
-    <div class="stat"><span class="label">Save System</span><span class="badge missing">Missing</span></div>
-    <div class="stat"><span class="label">Settings Menu</span><span class="badge missing">Missing</span></div>
-    <div class="stat"><span class="label">Audio</span><span class="badge missing">Missing</span></div>
-  </div>
-
-  <div class="card">
-    <h2>Milestones</h2>
-    <div class="milestone"><span class="check">&#10003;</span> Core Gameplay Loop</div>
-    <div class="milestone"><span class="check">&#10003;</span> Controller Integration</div>
-    <div class="milestone"><span class="cross">&#10007;</span> First Graphics Pass</div>
-    <div class="milestone"><span class="cross">&#10007;</span> Vertical Slice</div>
-    <div class="milestone"><span class="cross">&#10007;</span> Content Complete</div>
-    <div class="milestone"><span class="cross">&#10007;</span> Production Ready</div>
-  </div>
-
-  <div class="card">
-    <h2>Testing</h2>
-    <div class="stat"><span class="label">Status</span><span class="badge unknown">Unknown</span></div>
-    <div class="stat"><span class="label">Test Command</span><span>Not configured</span></div>
-    <div class="stat"><span class="label">Last Run</span><span>Never</span></div>
+    <h2>Codebase</h2>
+    <div class="stat"><span>GDScript files</span><span class="file-count">18</span></div>
+    <div class="stat"><span>Test files</span><span class="file-count">2</span></div>
+    <div class="stat"><span>Scenes (.tscn)</span><span class="file-count">2</span></div>
+    <div class="stat"><span>Art assets</span><span class="file-count">placeholder</span></div>
+    <div class="stat"><span>Audio</span><span class="file-count">procedural</span></div>
   </div>
 </div>
 
-<div class="card">
-  <h2>What's Built</h2>
+<!-- Recent milestones -->
+<div class="card full" style="margin-bottom:1.5rem;">
+  <h2>Recent Milestones</h2>
+  <div class="stat"><span>Phase 8 &mdash; Audio &amp; Feedback (engine, drift, missile, music SFX)</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 9 &mdash; Testing &amp; Automation (12 headless tests)</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Achievement System &mdash; 8 achievements defined + integration hooks</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Ghost Replay &mdash; Record &amp; playback ghost car data</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>AI Opponent &mdash; Single-player mode with AI racer</span><span class="badge done">complete</span></div>
+</div>
+
+<!-- Systems status -->
+<div class="card full" style="margin-bottom:1.5rem;">
+  <h2>Systems Status</h2>
   <table>
-    <tr><th>System</th><th>Details</th></tr>
-    <tr><td>Car Physics</td><td>Acceleration, braking, steering, traction, max speed 1200</td></tr>
-    <tr><td>Drift Mechanic</td><td>Hold-to-charge boost, color shift feedback, tire marks</td></tr>
-    <tr><td>Jump Mechanic</td><td>One-shot arc, airborne momentum, landing squash, 0.4s cooldown</td></tr>
-    <tr><td>Track</td><td>Procedural 65-point centerline, ~7200x4800px, walls, elevation zones</td></tr>
-    <tr><td>Checkpoints</td><td>4 checkpoints + finish line, 3-lap validation</td></tr>
-    <tr><td>Items</td><td>6 boost pickups (8s respawn), 5 missile pickups (10s respawn)</td></tr>
-    <tr><td>Missiles</td><td>Homing missiles: launch &rarr; tracking &rarr; expire, hit stun 1.5s</td></tr>
-    <tr><td>Split-Screen</td><td>2P SubViewport layout, independent cameras + HUDs</td></tr>
-    <tr><td>UI</td><td>Dual HUDs, countdown, pause menu, race complete, debug overlay (F1)</td></tr>
-    <tr><td>Input</td><td>P1: WASD+mouse+gamepad, P2: arrows+gamepad, auto-detection</td></tr>
+    <tr><th>System</th><th>Location</th><th>Status</th></tr>
+    <tr><td>RaceManager</td><td>project/scripts/race_manager.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>CarController</td><td>project/scripts/car_controller.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>Track (Procedural)</td><td>project/scripts/track.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>LapManager</td><td>project/scripts/lap_manager.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>UIController</td><td>project/scripts/ui_controller.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>Missile</td><td>project/scripts/missile.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>MissilePickup</td><td>project/scripts/missile_pickup.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>ItemPickup</td><td>project/scripts/item_pickup.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>GhostReplay</td><td>project/scripts/ghost_replay.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>AudioManager</td><td>project/scripts/audio_manager.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>AIController</td><td>project/scripts/ai_controller.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>AchievementManager</td><td>project/scripts/achievement_manager.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>SettingsManager</td><td>project/scripts/settings_manager.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>LapHistory</td><td>project/scripts/lap_history.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>GameConstants</td><td>project/scripts/game_constants.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>Logger</td><td>project/scripts/logger.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>InputRemapper</td><td>project/scripts/input_remapper.gd</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>Test Suite</td><td>tests/</td><td><span class="badge done">done</span></td></tr>
+    <tr><td>Studio OS Integration</td><td>game.config.json</td><td><span class="badge done">done</span></td></tr>
   </table>
 </div>
+
+<!-- Scenes + Assets -->
+<div class="grid">
+  <div class="card">
+    <h2>Scenes</h2>
+    <div class="stat"><span>MainMenu</span><span class="badge done">done</span></div>
+    <div class="stat"><span>Main (Race)</span><span class="badge done">done</span></div>
+  </div>
+  <div class="card">
+    <h2>Assets</h2>
+    <div class="stat"><span>Art</span><span class="badge stub">placeholder</span></div>
+    <div class="stat"><span>Audio</span><span class="badge done">procedural</span></div>
+    <div class="stat"><span>Fonts</span><span class="badge none">default</span></div>
+    <div class="stat"><span>Track Geometry</span><span class="badge done">procedural</span></div>
+  </div>
+</div>
+
+<!-- Achievements -->
+<div class="card full" id="achievements-card" style="margin-bottom:1.5rem;">
+  <div class="ach-header">
+    <h2>Achievements</h2>
+    <button id="ach-reload" onclick="loadAchievements()">Reload Data</button>
+  </div>
+  <div id="ach-summary" style="margin-bottom:0.75rem;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div class="ach-score"><span id="ach-earned">0</span> <span>/ <span id="ach-possible">0</span> pts</span></div>
+      <span id="ach-count" style="font-size:0.8rem;color:var(--dim);">0 / 0 unlocked</span>
+    </div>
+    <div class="bar-wrap" style="margin-top:0.5rem;">
+      <div class="bar-fill" id="ach-bar" style="width:0%;background:var(--accent);"></div>
+    </div>
+    <div class="progress-label"><span>Achievement Progress</span><span id="ach-pct">0%</span></div>
+  </div>
+  <div id="ach-list">
+    <div style="color:var(--dim);font-size:0.85rem;padding:1rem 0;text-align:center;">
+      Loading achievements&hellip;
+    </div>
+  </div>
+</div>
+
+<!-- Phase roadmap -->
+<div class="card full" style="margin-bottom:1.5rem;">
+  <h2>Phase Roadmap</h2>
+  <div class="stat"><span>Phase 1 &mdash; Foundation</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 2 &mdash; Input &amp; Control Integrity</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 3 &mdash; Core Physics &amp; Handling</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 4 &mdash; Combat Systems</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 5 &mdash; Track &amp; World Systems</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 6 &mdash; UI &amp; UX</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 7 &mdash; Progression &amp; Depth</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 8 &mdash; Audio &amp; Feedback</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 9 &mdash; Testing &amp; Automation</span><span class="badge done">complete</span></div>
+  <div class="stat"><span>Phase 10 &mdash; Release &amp; Compliance</span><span class="badge wip">in progress</span></div>
+</div>
+
+<!-- Future vision -->
+<div class="card full">
+  <h2>Future Vision</h2>
+  <table>
+    <tr><th>Feature</th><th>Notes</th></tr>
+    <tr><td>Multi-track championship mode</td><td>Sequential races across generated tracks with cumulative scoring</td></tr>
+    <tr><td>Online-ready deterministic logic</td><td>Lockstep-compatible race state for future netcode</td></tr>
+    <tr><td>AI difficulty tiers</td><td>Easy / Medium / Hard AI with tunable aggression and racing line</td></tr>
+    <tr><td>Track editor</td><td>Player-facing procedural track parameter adjustment</td></tr>
+    <tr><td>Ranked drift scoring</td><td>Drift-focused scoring mode with leaderboards</td></tr>
+    <tr><td>Tournament mode</td><td>Bracket-based local tournament for 2+ players</td></tr>
+  </table>
+</div>
+
+<script>
+function loadAchievements() {
+  var card = document.getElementById('ach-list');
+  fetch('achievements.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderAchievements(data); })
+    .catch(function() {
+      card.innerHTML = '<div style="color:var(--dim);font-size:0.85rem;padding:1rem 0;text-align:center;">' +
+        'Could not load achievements.json &mdash; ensure it is in the same directory as status.html</div>';
+    });
+}
+
+function renderAchievements(data) {
+  var achievements = data.achievements || [];
+  var meta = data.meta || {};
+
+  // Calculate stats
+  var unlocked = achievements.filter(function(a) { return a.unlocked; });
+  var earned = unlocked.reduce(function(sum, a) { return sum + a.points; }, 0);
+  var possible = achievements.reduce(function(sum, a) { return sum + a.points; }, 0);
+  var pct = possible > 0 ? Math.round((earned / possible) * 100) : 0;
+
+  document.getElementById('ach-earned').textContent = earned;
+  document.getElementById('ach-possible').textContent = possible;
+  document.getElementById('ach-count').textContent = unlocked.length + ' / ' + achievements.length + ' unlocked';
+  document.getElementById('ach-bar').style.width = pct + '%';
+  document.getElementById('ach-pct').textContent = pct + '%';
+
+  // Color the bar based on progress
+  var bar = document.getElementById('ach-bar');
+  if (pct === 100) bar.style.background = 'var(--green)';
+  else if (pct >= 50) bar.style.background = 'var(--accent)';
+  else if (pct > 0) bar.style.background = 'var(--yellow)';
+
+  // Sort: unlocked (most recent first), then locked
+  var sorted = unlocked
+    .sort(function(a, b) { return (b.unlockedAt || '').localeCompare(a.unlockedAt || ''); })
+    .concat(achievements.filter(function(a) { return !a.unlocked; }));
+
+  // Show up to 5 most recent unlocked + all locked
+  var recentUnlocked = sorted.filter(function(a) { return a.unlocked; }).slice(0, 5);
+  var locked = sorted.filter(function(a) { return !a.unlocked; });
+  var display = recentUnlocked.concat(locked);
+
+  var html = '';
+  if (display.length === 0) {
+    html = '<div style="color:var(--dim);font-size:0.85rem;padding:1rem 0;text-align:center;">No achievements defined</div>';
+  } else {
+    // Section label for unlocked
+    if (recentUnlocked.length > 0) {
+      html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--dim);padding:0.3rem 0;">Recent Unlocks</div>';
+    }
+    recentUnlocked.forEach(function(a) {
+      var date = a.unlockedAt ? new Date(a.unlockedAt).toLocaleDateString() : '';
+      html += '<div class="ach-row">' +
+        '<div class="ach-icon">&#127942;</div>' +
+        '<div class="ach-info"><div class="ach-name">' + esc(a.name) + '</div>' +
+        '<div class="ach-desc">' + esc(a.description) + (date ? ' &mdash; ' + date : '') + '</div></div>' +
+        '<div class="ach-pts">+' + a.points + '</div></div>';
+    });
+    if (unlocked.length > 5) {
+      html += '<div style="font-size:0.75rem;color:var(--dim);padding:0.3rem 0;text-align:center;">+ ' +
+        (unlocked.length - 5) + ' more unlocked</div>';
+    }
+    // Section label for locked
+    if (locked.length > 0) {
+      html += '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--dim);padding:0.5rem 0 0.3rem;">Locked</div>';
+    }
+    locked.forEach(function(a) {
+      html += '<div class="ach-row ach-locked">' +
+        '<div class="ach-icon locked">&#128274;</div>' +
+        '<div class="ach-info"><div class="ach-name">' + esc(a.name) + '</div>' +
+        '<div class="ach-desc">' + esc(a.description) + '</div></div>' +
+        '<div class="ach-pts">+' + a.points + '</div></div>';
+    });
+  }
+  document.getElementById('ach-list').innerHTML = html;
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+// Auto-load on page open
+loadAchievements();
+</script>
 
 </body>
 </html>

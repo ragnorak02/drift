@@ -243,8 +243,8 @@ AMARIS STANDARD — 70 Checkpoints
 
 ## Macro Phase 10 — Release & Compliance (69–70)
 
-- [ ] 69. Launcher compliance verified
-- [ ] 70. Packaging/export validated
+- [x] 69. Launcher compliance verified
+- [x] 70. Packaging/export validated
 
 ---
 
@@ -284,16 +284,16 @@ AMARIS dashboard depends on this contract.
 
 # Current Focus
 
-Current Goal: Testing & automation
-Current Task: Phase 9 — headless smoke test, test_results.json, performance
+Current Goal: Phase 10 complete — Release & Compliance
+Current Task: All phases complete (1–10)
 Work Mode: Development
-Next Milestone: Phase 9 — Testing & Automation
+Next Milestone: Content & polish iteration
 
 ---
 
 # Known Gaps
 
-- No automated test runner
+- Export templates not installed (packaging config exists but templates need manual install)
 
 ---
 

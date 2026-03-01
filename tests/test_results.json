@@ -50,7 +50,7 @@
 		},
 		{
 			"description": "SettingsManager default values are correct",
-			"durationMs": 23,
+			"durationMs": 14,
 			"name": "settings_defaults",
 			"status": "pass"
 		},
@@ -73,11 +73,11 @@
 			"status": "pass"
 		}
 	],
-	"durationMs": 43,
+	"durationMs": 34,
 	"gameId": "drift",
 	"status": "pass",
 	"testsFailed": 0,
 	"testsPassed": 12,
 	"testsTotal": 12,
-	"timestamp": "2026-02-28T20:30:53"
+	"timestamp": "2026-03-01T00:00:27"
 }
